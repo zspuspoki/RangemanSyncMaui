@@ -1,0 +1,28 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             x:Class="RangemanSync.MainPage">
+
+    <ContentPage.Content>
+        <StackLayout>
+            <Label Text="{Binding ProgressMessage}" TextColor="Red" x:Name="lblProgress" />
+            <ListView x:Name="LogHeadersList" ItemsSource="{Binding LogHeaderList}"
+                      CachingStrategy="RecycleElement"
+                      ItemSelected="LogHeadersList_ItemSelected">
+                <ListView.ItemTemplate>
+                    <DataTemplate>
+                        <ViewCell>
+                            <StackLayout>
+                                <Label TextColor="Black" Text="{Binding Label}"></Label>
+                            </StackLayout>
+                        </ViewCell>
+                    </DataTemplate>
+                </ListView.ItemTemplate>
+            </ListView>
+            <Button Text="Download Headers"  x:Name="DownloadHeadersButton" Command="{Binding Path=DownloadHeadersCommand}" IsVisible="{Binding WatchCommandButtonsAreVisible}"/>
+            <Button Text="Download / Save as GPX" x:Name="DownloadSaveGPXButton"/>
+            <Button Text="Disconnect watch" x:Name="DisconnectButton"/>
+        </StackLayout>
+    </ContentPage.Content>
+
+</ContentPage>
