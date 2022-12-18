@@ -1,4 +1,4 @@
-﻿namespace RangemanSync.ViewModels
+﻿namespace RangemanSync.ViewModels.Download
 {
     public class LogHeaderViewModel
     {

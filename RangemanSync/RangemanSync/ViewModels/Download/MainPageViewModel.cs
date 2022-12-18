@@ -5,7 +5,7 @@ using RangemanSync.Services;
 using RangemanSync.Services.WatchDataReceiver;
 using System.Collections.ObjectModel;
 
-namespace RangemanSync.ViewModels
+namespace RangemanSync.ViewModels.Download
 {
     public partial class MainPageViewModel : BaseViewModel
     {

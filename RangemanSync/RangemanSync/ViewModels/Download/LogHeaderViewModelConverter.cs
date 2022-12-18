@@ -1,6 +1,6 @@
 ﻿using RangemanSync.Services.WatchDataReceiver.DataExtractors.Header;
 
-namespace RangemanSync.ViewModels
+namespace RangemanSync.ViewModels.Download
 {
     internal static class LogHeaderViewModelConverter
     {

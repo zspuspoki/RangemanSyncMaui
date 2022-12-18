@@ -1,6 +1,6 @@
 ﻿using CommunityToolkit.Maui;
 using RangemanSync.Services;
-using RangemanSync.ViewModels;
+using RangemanSync.ViewModels.Download;
 using Serilog;
 
 namespace RangemanSync;

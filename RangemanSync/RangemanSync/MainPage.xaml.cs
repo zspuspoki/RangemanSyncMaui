@@ -1,4 +1,4 @@
-﻿using RangemanSync.ViewModels;
+﻿using RangemanSync.ViewModels.Download;
 
 namespace RangemanSync;
 
