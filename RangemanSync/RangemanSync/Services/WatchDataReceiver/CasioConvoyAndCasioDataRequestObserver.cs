@@ -24,6 +24,10 @@ namespace RangemanSync.Services.WatchDataReceiver
         {
         }
 
+        public void OnNext(Tuple<Guid, byte[]> value)
+        {
+        }
+
         public void RestartDataReceiving(TaskCompletionSource<IDataExtractor> taskCompletionSource)
         {
         }

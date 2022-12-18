@@ -18,26 +18,34 @@ namespace RangemanSync.Services.WatchDataReceiver
             this.logger = loggerFactory.CreateLogger<RemoteWatchController>();
         }
 
-        public void SendMessageToDRSP(byte[] data)
+        private async Task<bool> WriteCharacteristicValue(Guid serviceGuid, Guid characteristicGuid, 
+            byte[] data)
+        {
+            var service = await currentDevice.GetServiceAsync(serviceGuid);
+            var characteristic = await service.GetCharacteristicAsync(characteristicGuid);
+            return await characteristic.WriteAsync(data);
+        }
+
+        public async void SendMessageToDRSP(byte[] data)
         {
             // 00, 0F, 00, 10, 00, 00, 00, 20, 00, 00,
-            //var arrayToSend = new byte[] { 00, 0x0F, 00, 00, 00, 00, 00, 00, 00, 00 };
-            //gattServer.WriteCharacteristicValue(Guid.Parse(BLEConstants.CasioFeaturesServiceGuid),
-            //    Guid.Parse(BLEConstants.CasioDataRequestSPCharacteristic), data);
+            var arrayToSend = new byte[] { 00, 0x0F, 00, 00, 00, 00, 00, 00, 00, 00 };
+            await WriteCharacteristicValue(Guid.Parse(BLEConstants.CasioFeaturesServiceGuid),
+                Guid.Parse(BLEConstants.CasioDataRequestSPCharacteristic), data);
         }
 
-        public void SendConfirmationToContinueTransmission()
+        public async void SendConfirmationToContinueTransmission()
         {
-            //var arrayToSend = new byte[] { 0x07, 0x10, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00 };
-            //gattServer.WriteCharacteristicValue(Guid.Parse(BLEConstants.CasioFeaturesServiceGuid),
-            //    Guid.Parse(BLEConstants.CasioDataRequestSPCharacteristic), arrayToSend);
+            var arrayToSend = new byte[] { 0x07, 0x10, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00 };
+            await WriteCharacteristicValue(Guid.Parse(BLEConstants.CasioFeaturesServiceGuid),
+                Guid.Parse(BLEConstants.CasioDataRequestSPCharacteristic), arrayToSend);
         }
 
-        public void AskWatchToEndTransmission(byte categoryId)
+        public async void AskWatchToEndTransmission(byte categoryId)
         {
-            //var arrayToSend = new byte[] { 0x03, categoryId, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00 };
-            //gattServer.WriteCharacteristicValue(Guid.Parse(BLEConstants.CasioFeaturesServiceGuid),
-            //    Guid.Parse(BLEConstants.CasioDataRequestSPCharacteristic), arrayToSend);
+            var arrayToSend = new byte[] { 0x03, categoryId, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00 };
+            await WriteCharacteristicValue(Guid.Parse(BLEConstants.CasioFeaturesServiceGuid),
+                Guid.Parse(BLEConstants.CasioDataRequestSPCharacteristic), arrayToSend);
         }
 
         /// <summary>
@@ -47,38 +55,51 @@ namespace RangemanSync.Services.WatchDataReceiver
         /// <param name="length">result of GetLogTotalLength(i) or GetPointMemoryTotalLength</param>
         public async Task SendPointMemoryOrLogDownload(int address, int length)
         {
-            //var b = (byte)0;
-            //var b2 = (byte)16;
-            //byte[] arrayToSend = { b, b2,
-            //    (byte)(address & 255), (byte)((address >>> 8) & 255),
-            //    (byte)((address >>> 16) & 255), (byte)((address >>> 24) & 255),
-            //    (byte)(length & 255), (byte)((length >>> 8) & 255),
-            //    (byte)((length >>> 16) & 255), (byte)((length >>> 24) & 255) };
+            var b = (byte)0;
+            var b2 = (byte)16;
+            byte[] arrayToSend = { b, b2,
+                (byte)(address & 255), (byte)((int)((uint)address >> 8) & 255),
+                (byte)((int)((uint)address >> 16) & 255), (byte)((int)((uint)address >> 24) & 255),
+                (byte)(length & 255), (byte)((int)((uint)length >> 8) & 255),
+                (byte)((int)((uint)length >> 16) & 255), (byte)((int)((uint)length >> 24) & 255) };
 
-            //await gattServer.WriteCharacteristicValue(Guid.Parse(BLEConstants.CasioFeaturesServiceGuid),
-            //    Guid.Parse(BLEConstants.CasioDataRequestSPCharacteristic), arrayToSend);
+            await WriteCharacteristicValue(Guid.Parse(BLEConstants.CasioFeaturesServiceGuid),
+                Guid.Parse(BLEConstants.CasioDataRequestSPCharacteristic), arrayToSend);
         }
 
-        public void SendHeaderClosingCommandsToWatch()
+        public async void SendHeaderClosingCommandsToWatch()
         {
-            //logger.LogDebug("-- Before  WriteCharacteristicValue 1");
-            ////TODO : Move it to else if (value.Item1 == Guid.Parse(BLEConstants.CasioDataRequestSPCharacteristic)) ?
-            //gattServer.WriteCharacteristicValue(Guid.Parse(BLEConstants.CasioFeaturesServiceGuid),
-            //    Guid.Parse(BLEConstants.CasioDataRequestSPCharacteristic), new byte[] { 0x09, 0x0F, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00 });
-            //logger.LogDebug("-- After  WriteCharacteristicValue 1");
+            logger.LogDebug("-- Before  WriteCharacteristicValue 1");
+            //TODO : Move it to else if (value.Item1 == Guid.Parse(BLEConstants.CasioDataRequestSPCharacteristic)) ?
+            await WriteCharacteristicValue(Guid.Parse(BLEConstants.CasioFeaturesServiceGuid),
+                Guid.Parse(BLEConstants.CasioDataRequestSPCharacteristic), new byte[] { 0x09, 0x0F, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00 });
+            logger.LogDebug("-- After  WriteCharacteristicValue 1");
 
-            //gattServer.WriteCharacteristicValue(Guid.Parse(BLEConstants.CasioFeaturesServiceGuid),
-            //    Guid.Parse(BLEConstants.CasioDataRequestSPCharacteristic), new byte[] { 0x04, 0x0F, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00 });
-            //logger.LogDebug("-- After  WriteCharacteristicValue 2");
+            await WriteCharacteristicValue(Guid.Parse(BLEConstants.CasioFeaturesServiceGuid),
+                Guid.Parse(BLEConstants.CasioDataRequestSPCharacteristic), new byte[] { 0x04, 0x0F, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00 });
+            logger.LogDebug("-- After  WriteCharacteristicValue 2");
         }
 
-        public void SubscribeToCharacteristicChanges(CasioConvoyAndCasioDataRequestObserver casioConvoyAndCasioDataRequestObserver)
+        public async void SubscribeToCharacteristicChanges(CasioConvoyAndCasioDataRequestObserver casioConvoyAndCasioDataRequestObserver)
         {
-            //gattServer.NotifyCharacteristicValue(Guid.Parse(BLEConstants.CasioFeaturesServiceGuid), Guid.Parse(BLEConstants.CasioDataRequestSPCharacteristic),
-            //    casioConvoyAndCasioDataRequestObserver);
+            var service = await currentDevice.GetServiceAsync(Guid.Parse(BLEConstants.CasioFeaturesServiceGuid));
+            
+            var casioDataRequestSPCharacteristic = await service.GetCharacteristicAsync(
+                Guid.Parse(BLEConstants.CasioDataRequestSPCharacteristic));
 
-            //gattServer.NotifyCharacteristicValue(Guid.Parse(BLEConstants.CasioFeaturesServiceGuid), Guid.Parse(BLEConstants.CasioConvoyCharacteristic),
-            //    casioConvoyAndCasioDataRequestObserver);
+            casioDataRequestSPCharacteristic.ValueUpdated += (o, args) =>
+            {
+                casioConvoyAndCasioDataRequestObserver.OnNext(new Tuple<Guid, byte[]>(args.Characteristic.Id, 
+                    args.Characteristic.Value));
+            };
+
+            var casioConvoyCharacteristic = await service.GetCharacteristicAsync(Guid.Parse(BLEConstants.CasioConvoyCharacteristic));
+
+            casioConvoyCharacteristic.ValueUpdated += (o, args) =>
+            {
+                casioConvoyAndCasioDataRequestObserver.OnNext(new Tuple<Guid, byte[]>(args.Characteristic.Id,
+                    args.Characteristic.Value));
+            };
         }
 
         public async Task SendDownloadLogCommandsToWatch()
