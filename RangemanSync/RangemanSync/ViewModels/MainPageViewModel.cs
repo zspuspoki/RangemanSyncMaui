@@ -2,6 +2,7 @@
 using CommunityToolkit.Mvvm.Input;
 using Microsoft.Extensions.Logging;
 using RangemanSync.Services;
+using RangemanSync.Services.WatchDataReceiver;
 using System.Collections.ObjectModel;
 
 namespace RangemanSync.ViewModels
@@ -24,6 +25,7 @@ namespace RangemanSync.ViewModels
         private ILogger<MainPageViewModel> logger;
         private readonly ILoggerFactory loggerFactory;
         private readonly BluetoothConnectorService bluetoothConnectorService;
+        private DateTime lastHeaderDownloadTime;
 
         [ObservableProperty]
         string progressMessage;
@@ -43,30 +45,30 @@ namespace RangemanSync.ViewModels
 
             SetProgressMessage("Looking for Casio GPR-B1000 device. Please connect your watch.");
 
-            await bluetoothConnectorService.FindAndConnectToWatch(SetProgressMessage, (connection) =>
+            await bluetoothConnectorService.FindAndConnectToWatch(SetProgressMessage,async (connection) =>
             {
-                //var logPointMemoryService = new LogPointMemoryExtractorService(connection, loggerFactory);
-                //logPointMemoryService.ProgressChanged += LogPointMemoryService_ProgressChanged;
-                //var headersTask = logPointMemoryService.GetHeaderDataAsync();
-                //var headers = await headersTask;
+                var logPointMemoryService = new LogPointMemoryExtractorService(connection, loggerFactory);
+                logPointMemoryService.ProgressChanged += LogPointMemoryService_ProgressChanged;
+                var headersTask = logPointMemoryService.GetHeaderDataAsync();
+                var headers = await headersTask;
 
                 LogHeaderList.Clear();
 
-                //if (headers != null && headers.Count > 0)
-                //{
-                //    headers.ForEach(h => LogHeaderList.Add(h.ToViewModel()));
-                //}
-                //else
-                //{
-                //    logger.LogDebug("Headers downloading resulted 0 headers");
-                //    SetProgressMessage("Headers downloading resulted 0 headers. Please make sure you have recorded routes on the watch. If yes, then please try again because the transmission has been terminated by the watch.");
-                //}
+                if (headers != null && headers.Count > 0)
+                {
+                    headers.ForEach(h => LogHeaderList.Add(h.ToViewModel()));
+                }
+                else
+                {
+                    logger.LogDebug("Headers downloading resulted 0 headers");
+                    SetProgressMessage("Headers downloading resulted 0 headers. Please make sure you have recorded routes on the watch. If yes, then please try again because the transmission has been terminated by the watch.");
+                }
 
-                //logPointMemoryService.ProgressChanged -= LogPointMemoryService_ProgressChanged;
+                logPointMemoryService.ProgressChanged -= LogPointMemoryService_ProgressChanged;
 
-                //DisconnectButtonIsVisible = false;
-                //lastHeaderDownloadTime = DateTime.Now;
-                return Task.FromResult(true);
+                DisconnectButtonIsVisible = false;
+                lastHeaderDownloadTime = DateTime.Now;
+                return true;
             },
             () =>
             {
@@ -75,6 +77,11 @@ namespace RangemanSync.ViewModels
             },
             () => DisconnectButtonIsVisible = true);
 
+        }
+
+        private void LogPointMemoryService_ProgressChanged(object sender, DataReceiverProgressEventArgs e)
+        {
+            SetProgressMessage(e.Text);
         }
 
         private void SetProgressMessage(string message)
