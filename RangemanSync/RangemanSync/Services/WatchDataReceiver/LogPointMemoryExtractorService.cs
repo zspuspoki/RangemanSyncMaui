@@ -116,7 +116,7 @@ namespace RangemanSync.Services.WatchDataReceiver
             casioConvoyAndCasioDataRequestObserver.ProgressChanged += CasioConvoyAndCasioDataRequestObserver_ProgressChanged;
             logger.LogDebug("GetLogDataAsync -- After creating observer");
 
-            remoteWatchController.SubscribeToCharacteristicChanges(casioConvoyAndCasioDataRequestObserver);
+            await remoteWatchController.SubscribeToCharacteristicChanges(casioConvoyAndCasioDataRequestObserver);
 
             IDataExtractor logDataResultFromWatch = null;
             var lastTransmissionHasCrcError = false;

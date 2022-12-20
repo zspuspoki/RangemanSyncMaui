@@ -12,6 +12,7 @@ namespace RangemanSync.ViewModels.Download
     public partial class MainPageViewModel : BaseViewModel
     {
         public IAsyncRelayCommand DownloadHeadersCommand { get; }
+        public IAsyncRelayCommand SaveGPXCommand { get; }
         public ObservableCollection<LogHeaderViewModel> LogHeaderList { get; } = new ObservableCollection<LogHeaderViewModel>();
         public LogHeaderViewModel SelectedLogHeader { get; set; }
 
@@ -23,6 +24,7 @@ namespace RangemanSync.ViewModels.Download
             this.bluetoothConnectorService = bluetoothConnectorService;
             this.saveGPXFileService = saveGPXFileService;
             DownloadHeadersCommand = new AsyncRelayCommand(DownloadHeaders_Clicked);
+            SaveGPXCommand = new AsyncRelayCommand(DownloadSaveGPXButton_Clicked);
         }
 
         private ILogger<MainPageViewModel> logger;
@@ -90,7 +92,7 @@ namespace RangemanSync.ViewModels.Download
 
         }
 
-        private async void DownloadSaveGPXButton_Clicked()
+        private async Task DownloadSaveGPXButton_Clicked()
         {
             logger.LogInformation("--- MainPage - start DownloadSaveGPXButton_Clicked");
 
