@@ -19,7 +19,13 @@ public static class MauiProgram
 				fonts.AddFont("OpenSans-Semibold.ttf", "OpenSansSemibold");
 			});
 
-		builder.Services.AddSingleton<BluetoothConnectorService>();
+#if WINDOWS
+		builder.Services.AddTransient<ISaveGPXFileService, RangemanSync.Platforms.Windows.SaveGPXFileService>();
+#elif ANDROID
+		builder.Services.AddTransient<ISaveGPXFileService, RangemanSync.Platforms.Android.SaveGPXFileService>();
+#endif
+
+        builder.Services.AddSingleton<BluetoothConnectorService>();
 		builder.Services.AddSingleton<MainPageViewModel>();
 		builder.Services.AddSingleton<MainPage>();
 

@@ -80,7 +80,7 @@ namespace RangemanSync.Services.WatchDataReceiver
 
                 if (casioConvoyDataReceivingIsAllowed && value.Item1 == Guid.Parse(BLEConstants.CasioConvoyCharacteristic))
                 {
-                    if (value.Item2[0] == 5)
+                    if (value.Item2.Length > 0 && value.Item2[0] == 5)
                     {
                         var bytesToAdd = value.Item2.ToList();
                         bytesToAdd.RemoveAt(0);  //Remove type code

@@ -22,11 +22,17 @@ namespace RangemanSync.Services
             bluetoothLE = CrossBluetoothLE.Current;
             adapter = CrossBluetoothLE.Current.Adapter;
             adapter.ScanTimeout = 70000;
+            adapter.DeviceDiscovered += Adapter_DeviceDiscovered;
         }
 
         private void Adapter_DeviceDiscovered(object sender, DeviceEventArgs e)
         {
             currentDevice = e.Device;
+
+            if(scanCancellationTokenSource != null)
+            {
+                scanCancellationTokenSource.Cancel();
+            }
         }
 
         public async Task FindAndConnectToWatch(Action<string> progressMessageMethod,
@@ -49,8 +55,10 @@ namespace RangemanSync.Services
                 beforeStartScanningMethod();
             }
 
+            scanCancellationTokenSource = new CancellationTokenSource();
             await adapter.StartScanningForDevicesAsync(scanFilterOptions: null, 
-                (device) => device.Name != null && device.Name.Contains(WatchDeviceName));
+                (device) => device.Name != null && device.Name.Contains(WatchDeviceName), 
+                allowDuplicatesKey: false, scanCancellationTokenSource.Token);
 
             if(currentDevice != null)
             {

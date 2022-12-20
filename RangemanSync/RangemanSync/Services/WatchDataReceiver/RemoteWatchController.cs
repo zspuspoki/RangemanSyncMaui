@@ -102,6 +102,8 @@ namespace RangemanSync.Services.WatchDataReceiver
                     args.Characteristic.Value));
             };
 
+            await casioDataRequestSPCharacteristic.StartUpdatesAsync();
+
             var casioConvoyCharacteristic = await service.GetCharacteristicAsync(Guid.Parse(BLEConstants.CasioConvoyCharacteristic));
 
             casioConvoyCharacteristic.ValueUpdated += (o, args) =>
@@ -109,6 +111,8 @@ namespace RangemanSync.Services.WatchDataReceiver
                 casioConvoyAndCasioDataRequestObserver.OnNext(new Tuple<Guid, byte[]>(args.Characteristic.Id,
                     args.Characteristic.Value));
             };
+
+            await casioConvoyCharacteristic.StartUpdatesAsync();
         }
 
         public async Task SendDownloadLogCommandsToWatch()
