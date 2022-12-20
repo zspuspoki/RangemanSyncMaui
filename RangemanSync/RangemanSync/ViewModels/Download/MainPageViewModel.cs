@@ -72,6 +72,8 @@ namespace RangemanSync.ViewModels.Download
                 logPointMemoryService.ProgressChanged -= LogPointMemoryService_ProgressChanged;
 
                 DisconnectButtonIsVisible = false;
+                WatchCommandButtonsAreVisible = true;
+
                 lastHeaderDownloadTime = DateTime.Now;
                 return true;
             },
@@ -80,7 +82,11 @@ namespace RangemanSync.ViewModels.Download
                 SetProgressMessage("An error occured during sending watch commands. Please try to connect again");
                 return Task.FromResult(true);
             },
-            () => DisconnectButtonIsVisible = true);
+            () =>
+            { 
+                DisconnectButtonIsVisible = true;
+                WatchCommandButtonsAreVisible = false;
+            });
 
         }
 
