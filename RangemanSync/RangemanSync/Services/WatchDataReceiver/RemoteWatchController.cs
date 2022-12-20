@@ -89,7 +89,7 @@ namespace RangemanSync.Services.WatchDataReceiver
             logger.LogDebug("-- After  WriteCharacteristicValue 2");
         }
 
-        public async void SubscribeToCharacteristicChanges(CasioConvoyAndCasioDataRequestObserver casioConvoyAndCasioDataRequestObserver)
+        public async Task SubscribeToCharacteristicChanges(CasioConvoyAndCasioDataRequestObserver casioConvoyAndCasioDataRequestObserver)
         {
             var service = await currentDevice.GetServiceAsync(Guid.Parse(BLEConstants.CasioFeaturesServiceGuid));
             

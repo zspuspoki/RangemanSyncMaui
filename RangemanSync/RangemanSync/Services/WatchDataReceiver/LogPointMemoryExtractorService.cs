@@ -40,7 +40,7 @@ namespace RangemanSync.Services.WatchDataReceiver
 
             casioConvoyAndCasioDataRequestObserver.ProgressChanged += CasioConvoyAndCasioDataRequestObserver_ProgressChanged;
 
-            remoteWatchController.SubscribeToCharacteristicChanges(casioConvoyAndCasioDataRequestObserver);
+            await remoteWatchController.SubscribeToCharacteristicChanges(casioConvoyAndCasioDataRequestObserver);
             IDataExtractor headerResultFromWatch = null;
 
             var lastTransmissionHasCrcError = false;
