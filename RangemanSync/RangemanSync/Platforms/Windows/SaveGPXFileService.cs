@@ -4,7 +4,7 @@ namespace RangemanSync.Platforms.Windows
 {
     public class SaveGPXFileService : ISaveGPXFileService
     {
-        public async void SaveGPXFile(string fileName)
+        public async void SaveGPXFile(string fileName, string fileContent)
         {
             var folderPicker = new WindowsFolderPicker();
             // Might be needed to make it work on Windows 10
@@ -20,9 +20,13 @@ namespace RangemanSync.Platforms.Windows
 
             if(result != null)
             {
-                string gpx = Preferences.Default.Get(Constants.PrefKeyGPX, "");
-                File.WriteAllText(Path.Combine(result.Path, fileName), gpx);
+                File.WriteAllText(Path.Combine(result.Path, fileName), fileContent);
             }
+        }
+
+        public void SaveGPXFile(string fileName)
+        {
+            throw new NotImplementedException();
         }
     }
 }

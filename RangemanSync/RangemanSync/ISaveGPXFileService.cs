@@ -9,5 +9,7 @@ namespace RangemanSync
     public interface ISaveGPXFileService
     {
         void SaveGPXFile(string fileName);
+
+        void SaveGPXFile(string fileName, string fileContent);
     }
 }

@@ -144,6 +144,7 @@ namespace RangemanSync.ViewModels.Download
                 }
 
                 DisconnectButtonIsVisible = false;
+                WatchCommandButtonsAreVisible = true;
 
                 return true;
             },
@@ -152,7 +153,11 @@ namespace RangemanSync.ViewModels.Download
                 SetProgressMessage("An error occured during sending watch commands. Please try to connect again");
                 return true;
             },
-            () => DisconnectButtonIsVisible = true);
+            () => 
+            { 
+                DisconnectButtonIsVisible = true;
+                WatchCommandButtonsAreVisible = false;
+            });
 
             EnableOtherTabs();
             saveGPXButtonCanBePressed = true;
@@ -197,8 +202,12 @@ namespace RangemanSync.ViewModels.Download
             var fileName = $"GPR-B1000-Route-{headerTime.Year}-{headerTime.Month}-{headerTime.Day}-2.gpx";
 
             var gpxString = gpx.ToXml();
+#if WINDOWS
+            saveGPXFileService.SaveGPXFile(fileName, gpxString);
+#else
             Preferences.Default.Set(Constants.PrefKeyGPX, gpxString);
             saveGPXFileService.SaveGPXFile(fileName);
+#endif
         }
 
 

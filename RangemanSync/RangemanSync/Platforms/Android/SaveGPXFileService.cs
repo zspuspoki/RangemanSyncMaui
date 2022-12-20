@@ -19,5 +19,10 @@ namespace RangemanSync.Platforms.Android
             intentCreate.PutExtra(Intent.ExtraTitle, fileName);
             activity.StartActivityForResult(intentCreate, ActivityRequestCode.SaveGPXFile);
         }
+
+        public void SaveGPXFile(string fileName, string fileContent)
+        {
+            throw new NotImplementedException();
+        }
     }
 }
