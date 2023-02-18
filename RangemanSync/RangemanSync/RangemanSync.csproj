@@ -12,7 +12,7 @@
 		<ImplicitUsings>enable</ImplicitUsings>
 
 		<!-- Display name -->
-		<ApplicationTitle>RangemanSync</ApplicationTitle>
+		<ApplicationTitle>Casio GPR-B1000 GPXport</ApplicationTitle>
 
 		<!-- App Identifier -->
 		<ApplicationId>com.companyname.rangemansync</ApplicationId>
