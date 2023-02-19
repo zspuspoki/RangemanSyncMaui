@@ -13,6 +13,8 @@ namespace RangemanSync.ViewModels.Download
     {
         public IAsyncRelayCommand DownloadHeadersCommand { get; }
         public IAsyncRelayCommand SaveGPXCommand { get; }
+        public IAsyncRelayCommand DisconnectCommand { get; set; }
+
         public ObservableCollection<LogHeaderViewModel> LogHeaderList { get; } = new ObservableCollection<LogHeaderViewModel>();
         public LogHeaderViewModel SelectedLogHeader { get; set; }
 
@@ -25,6 +27,7 @@ namespace RangemanSync.ViewModels.Download
             this.saveGPXFileService = saveGPXFileService;
             DownloadHeadersCommand = new AsyncRelayCommand(DownloadHeaders_Clicked);
             SaveGPXCommand = new AsyncRelayCommand(DownloadSaveGPXButton_Clicked);
+            DisconnectCommand = new AsyncRelayCommand(DisconnectButton_Clicked);
         }
 
         private ILogger<MainPageViewModel> logger;
@@ -162,6 +165,13 @@ namespace RangemanSync.ViewModels.Download
             EnableOtherTabs();
             saveGPXButtonCanBePressed = true;
             //Save selected log header as GPX
+        }
+
+        private async Task DisconnectButton_Clicked()
+        {
+            await bluetoothConnectorService.DisconnectFromWatch(SetProgressMessage);
+            DisconnectButtonIsVisible = false;
+            WatchCommandButtonsAreVisible = true;
         }
 
         private void DisableOtherTabs()

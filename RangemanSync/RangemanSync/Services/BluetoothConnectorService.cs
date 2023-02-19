@@ -79,8 +79,38 @@ namespace RangemanSync.Services
             }
 
         }
+
+        public async Task DisconnectFromWatch(Action<string> progressMessageMethod)
+        {
+            try
+            {
+                if (progressMessageMethod is null)
+                {
+                    throw new ArgumentNullException(nameof(progressMessageMethod));
+                }
+
+                logger.LogInformation("Started DisconnectFromWatch");
+
+                if (scanCancellationTokenSource != null && !scanCancellationTokenSource.IsCancellationRequested)
+                {
+                    scanCancellationTokenSource.Cancel();
+                    progressMessageMethod("Bluetooth: GPR-B1000 device scanning successfully aborted.");
+                }
+
+                foreach(var device in adapter.ConnectedDevices)
+                {
+                    await adapter.DisconnectDeviceAsync(device);
+                }
+            }
+            catch (Exception ex)
+            {
+                logger.LogError(ex, "An unexpected error occured during disconnecting the watch.");
+                progressMessageMethod("An unexpected error occured during disconnecting the watch.");
+            }
+        }
+
 #if ANDROID
-        #region BluetoothPermissions
+            #region BluetoothPermissions
         public async Task<PermissionStatus> CheckBluetoothPermissions()
         {
             PermissionStatus status = PermissionStatus.Unknown;
@@ -110,10 +140,10 @@ namespace RangemanSync.Services
             }
             return status;
         }
-        #endregion BluetoothPermissions
+            #endregion BluetoothPermissions
 #elif IOS
 #elif WINDOWS
 #endif
 
+        }
     }
-}
