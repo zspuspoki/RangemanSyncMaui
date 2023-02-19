@@ -2,9 +2,9 @@
 
 namespace RangemanSync.Platforms.Windows
 {
-    public class SaveGPXFileService : ISaveGPXFileService
+    public class SaveFileService : ISaveTextFileService
     {
-        public async void SaveGPXFile(string fileName, string fileContent)
+        public async void SaveFile(string fileName, string fileContent)
         {
             var folderPicker = new WindowsFolderPicker();
             // Might be needed to make it work on Windows 10
@@ -24,7 +24,7 @@ namespace RangemanSync.Platforms.Windows
             }
         }
 
-        public void SaveGPXFile(string fileName)
+        public void SaveFile(string fileName)
         {
             throw new NotImplementedException();
         }

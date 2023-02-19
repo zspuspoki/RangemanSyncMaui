@@ -19,12 +19,12 @@ namespace RangemanSync.ViewModels.Download
         public LogHeaderViewModel SelectedLogHeader { get; set; }
 
         public MainPageViewModel(ILoggerFactory loggerFactory, 
-            BluetoothConnectorService bluetoothConnectorService, ISaveGPXFileService saveGPXFileService)
+            BluetoothConnectorService bluetoothConnectorService, ISaveTextFileService saveFileService)
         {
             this.logger = loggerFactory.CreateLogger<MainPageViewModel>();
             this.loggerFactory = loggerFactory;
             this.bluetoothConnectorService = bluetoothConnectorService;
-            this.saveGPXFileService = saveGPXFileService;
+            this.saveFileService = saveFileService;
             DownloadHeadersCommand = new AsyncRelayCommand(DownloadHeaders_Clicked);
             SaveGPXCommand = new AsyncRelayCommand(DownloadSaveGPXButton_Clicked);
             DisconnectCommand = new AsyncRelayCommand(DisconnectButton_Clicked);
@@ -33,7 +33,7 @@ namespace RangemanSync.ViewModels.Download
         private ILogger<MainPageViewModel> logger;
         private readonly ILoggerFactory loggerFactory;
         private readonly BluetoothConnectorService bluetoothConnectorService;
-        private readonly ISaveGPXFileService saveGPXFileService;
+        private readonly ISaveTextFileService saveFileService;
         private DateTime lastHeaderDownloadTime;
         private bool saveGPXButtonCanBePressed = true;
 
@@ -213,10 +213,10 @@ namespace RangemanSync.ViewModels.Download
 
             var gpxString = gpx.ToXml();
 #if WINDOWS
-            saveGPXFileService.SaveGPXFile(fileName, gpxString);
+            saveFileService.SaveFile(fileName, gpxString);
 #else
             Preferences.Default.Set(Constants.PrefKeyGPX, gpxString);
-            saveGPXFileService.SaveGPXFile(fileName);
+            saveFileService.SaveFile(fileName);
 #endif
         }
 

@@ -3,6 +3,7 @@ using MetroLog.MicrosoftExtensions;
 using MetroLog.Operators;
 using Microsoft.Extensions.Logging;
 using RangemanSync.Services;
+using RangemanSync.ViewModels.Config;
 using RangemanSync.ViewModels.Download;
 
 namespace RangemanSync;
@@ -57,14 +58,16 @@ public static class MauiProgram
         builder.Services.AddSingleton(LogOperatorRetriever.Instance);
 
 #if WINDOWS
-        builder.Services.AddTransient<ISaveGPXFileService, RangemanSync.Platforms.Windows.SaveGPXFileService>();
+        builder.Services.AddTransient<ISaveTextFileService, RangemanSync.Platforms.Windows.SaveFileService>();
 #elif ANDROID
-		builder.Services.AddTransient<ISaveGPXFileService, RangemanSync.Platforms.Android.SaveGPXFileService>();
+		builder.Services.AddTransient<ISaveTextFileService, RangemanSync.Platforms.Android.SaveFileService>();
 #endif
 
         builder.Services.AddSingleton<BluetoothConnectorService>();
 		builder.Services.AddSingleton<MainPageViewModel>();
 		builder.Services.AddSingleton<MainPage>();
+        builder.Services.AddSingleton<ConfigPageViewModel>();
+        builder.Services.AddSingleton<ConfigPage>();
 
         return builder.Build();
 	}

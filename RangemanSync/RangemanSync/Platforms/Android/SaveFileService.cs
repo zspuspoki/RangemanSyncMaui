@@ -2,16 +2,16 @@
 
 namespace RangemanSync.Platforms.Android
 {
-    public class SaveGPXFileService : ISaveGPXFileService
+    public class SaveFileService : ISaveTextFileService
     {
         private readonly MainActivity activity;
 
-        public SaveGPXFileService(MainActivity activity)
+        public SaveFileService(MainActivity activity)
         {
             this.activity = activity;
         }
 
-        public void SaveGPXFile(string fileName)
+        public void SaveFile(string fileName)
         {
             Intent intentCreate = new Intent(Intent.ActionCreateDocument);
             intentCreate.AddCategory(Intent.CategoryOpenable);
@@ -20,7 +20,7 @@ namespace RangemanSync.Platforms.Android
             activity.StartActivityForResult(intentCreate, ActivityRequestCode.SaveGPXFile);
         }
 
-        public void SaveGPXFile(string fileName, string fileContent)
+        public void SaveFile(string fileName, string fileContent)
         {
             throw new NotImplementedException();
         }

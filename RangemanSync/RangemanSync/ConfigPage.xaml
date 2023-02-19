@@ -2,11 +2,25 @@
 <ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
              x:Class="RangemanSync.ConfigPage"
-             Title="ConfigPage">
-    <VerticalStackLayout>
-        <Label 
-            Text="Welcome to .NET MAUI!"
-            VerticalOptions="Center" 
-            HorizontalOptions="Center" />
-    </VerticalStackLayout>
+             Title="Configuration">
+    <StackLayout>
+        <Frame BorderColor="Gray"
+                   CornerRadius="5"
+                   Padding="8">
+            <StackLayout>
+                <Label Text="Error reporting / support" TextColor="Black"
+                           FontSize="Medium"
+                           FontAttributes="Bold" />
+                <BoxView Color="Gray"
+                             HeightRequest="2"
+                             HorizontalOptions="Fill" />
+                <StackLayout Orientation="Horizontal">
+                    <CheckBox  IsChecked="{Binding DownloadLogFiles}"/>
+                    <Label TextColor="Black" Text="Download log files"/>
+                </StackLayout>
+            </StackLayout>
+        </Frame>
+        <Button Text="Apply changes" x:Name="ApplyButton" Command="{Binding Path=ApplyCommand}" />
+        <Label Text="{Binding ProgressMessage}" TextColor="Red" x:Name="lblProgress" />
+    </StackLayout>
 </ContentPage>
