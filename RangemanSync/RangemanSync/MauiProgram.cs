@@ -1,7 +1,9 @@
 ﻿using CommunityToolkit.Maui;
+using MetroLog.MicrosoftExtensions;
+using MetroLog.Operators;
+using Microsoft.Extensions.Logging;
 using RangemanSync.Services;
 using RangemanSync.ViewModels.Download;
-using Serilog;
 
 namespace RangemanSync;
 
@@ -19,8 +21,43 @@ public static class MauiProgram
 				fonts.AddFont("OpenSans-Semibold.ttf", "OpenSansSemibold");
 			});
 
+        builder.Logging
+#if DEBUG
+            .AddTraceLogger(
+                options =>
+                {
+                    options.MinLevel = LogLevel.Trace;
+                    options.MaxLevel = LogLevel.Critical;
+                }) // Will write to the Debug Output
+#endif
+            .AddInMemoryLogger(
+                options =>
+                {
+                    options.MaxLines = 1024;
+                    options.MinLevel = LogLevel.Debug;
+                    options.MaxLevel = LogLevel.Critical;
+                })
+#if RELEASE
+            .AddStreamingFileLogger(
+                options =>
+                {
+                    options.RetainDays = 2;
+                    options.FolderPath = Path.Combine(
+                        FileSystem.CacheDirectory,
+                        "MetroLogs");
+                })
+#endif
+            .AddConsoleLogger(
+                options =>
+                {
+                    options.MinLevel = LogLevel.Information;
+                    options.MaxLevel = LogLevel.Critical;
+                }); // Will write to the Console Output (logcat for android)
+
+        builder.Services.AddSingleton(LogOperatorRetriever.Instance);
+
 #if WINDOWS
-		builder.Services.AddTransient<ISaveGPXFileService, RangemanSync.Platforms.Windows.SaveGPXFileService>();
+        builder.Services.AddTransient<ISaveGPXFileService, RangemanSync.Platforms.Windows.SaveGPXFileService>();
 #elif ANDROID
 		builder.Services.AddTransient<ISaveGPXFileService, RangemanSync.Platforms.Android.SaveGPXFileService>();
 #endif
@@ -28,8 +65,6 @@ public static class MauiProgram
         builder.Services.AddSingleton<BluetoothConnectorService>();
 		builder.Services.AddSingleton<MainPageViewModel>();
 		builder.Services.AddSingleton<MainPage>();
-
-        builder.Logging.AddSerilog(dispose: true);
 
         return builder.Build();
 	}
