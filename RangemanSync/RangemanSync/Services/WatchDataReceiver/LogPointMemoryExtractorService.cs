@@ -3,11 +3,6 @@ using Plugin.BLE.Abstractions.Contracts;
 using RangemanSync.Services.WatchDataReceiver.DataExtractors;
 using RangemanSync.Services.WatchDataReceiver.DataExtractors.Data;
 using RangemanSync.Services.WatchDataReceiver.DataExtractors.Header;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace RangemanSync.Services.WatchDataReceiver
 {
@@ -27,128 +22,144 @@ namespace RangemanSync.Services.WatchDataReceiver
 
         public async Task<List<LogHeaderDataInfo>> GetHeaderDataAsync()
         {
-            await remoteWatchController.SendInitializationCommandsToWatch();
-
-            //REceive StartReadyToTransDataSequence
-
-            var allDataReceived = new TaskCompletionSource<IDataExtractor>();
-            var logAndPointMemoryHeaderParser = new LogAndPointMemoryHeaderParser(loggerFactory);
-
-            var casioConvoyAndCasioDataRequestObserver =
-                new CasioConvoyAndCasioDataRequestObserver(logAndPointMemoryHeaderParser,
-                    remoteWatchController, allDataReceived, loggerFactory, 0x0F, 8192);
-
-            casioConvoyAndCasioDataRequestObserver.ProgressChanged += CasioConvoyAndCasioDataRequestObserver_ProgressChanged;
-
-            await remoteWatchController.SubscribeToCharacteristicChanges(casioConvoyAndCasioDataRequestObserver);
-            IDataExtractor headerResultFromWatch = null;
-
-            var lastTransmissionHasCrcError = false;
-            do
+            try
             {
-                logger.LogDebug($"Inside lastTransmissionHasCrcError loop");
+                await remoteWatchController.SendInitializationCommandsToWatch();
 
-                casioConvoyAndCasioDataRequestObserver.RestartDataReceiving(allDataReceived);
+                //REceive StartReadyToTransDataSequence
 
-                FireProgressChangedEvent("Sending download commands to watch.");
-                await remoteWatchController.SendDownloadLogCommandsToWatch();
+                var allDataReceived = new TaskCompletionSource<IDataExtractor>();
+                var logAndPointMemoryHeaderParser = new LogAndPointMemoryHeaderParser(loggerFactory);
 
-                FireProgressChangedEvent("Sending download log header commands to watch.");
-                await remoteWatchController.SendDownloadHeaderCommandToWatch();
+                var casioConvoyAndCasioDataRequestObserver =
+                    new CasioConvoyAndCasioDataRequestObserver(logAndPointMemoryHeaderParser,
+                        remoteWatchController, allDataReceived, loggerFactory, 0x0F, 8192);
 
-                //PreviousDataTransmitReplayer previousDataTransmitReplayer = new PreviousDataTransmitReplayer(casioConvoyAndCasioDataRequestObserver);
-                //previousDataTransmitReplayer.Execute();
+                casioConvoyAndCasioDataRequestObserver.ProgressChanged += CasioConvoyAndCasioDataRequestObserver_ProgressChanged;
 
-                headerResultFromWatch = await allDataReceived.Task;
-                allDataReceived = new TaskCompletionSource<IDataExtractor>();
+                await remoteWatchController.SubscribeToCharacteristicChanges(casioConvoyAndCasioDataRequestObserver);
+                IDataExtractor headerResultFromWatch = null;
 
-                lastTransmissionHasCrcError = casioConvoyAndCasioDataRequestObserver.HasCrcError;
-            } while (lastTransmissionHasCrcError);
-
-            casioConvoyAndCasioDataRequestObserver.ProgressChanged -= CasioConvoyAndCasioDataRequestObserver_ProgressChanged;
-
-            if (headerResultFromWatch != null && headerResultFromWatch is LogAndPointMemoryHeaderParser dataExtractor)
-            {
-                var result = new List<LogHeaderDataInfo>();
-
-                for (var i = 1; i <= 20; i++)
+                var lastTransmissionHasCrcError = false;
+                do
                 {
-                    var headerToAdd = dataExtractor.GetLogHeaderDataInfo(i);
+                    logger.LogDebug($"Inside lastTransmissionHasCrcError loop");
 
-                    if (headerToAdd != null)
+                    casioConvoyAndCasioDataRequestObserver.RestartDataReceiving(allDataReceived);
+
+                    FireProgressChangedEvent("Sending download commands to watch.");
+                    await remoteWatchController.SendDownloadLogCommandsToWatch();
+
+                    FireProgressChangedEvent("Sending download log header commands to watch.");
+                    await remoteWatchController.SendDownloadHeaderCommandToWatch();
+
+                    //PreviousDataTransmitReplayer previousDataTransmitReplayer = new PreviousDataTransmitReplayer(casioConvoyAndCasioDataRequestObserver);
+                    //previousDataTransmitReplayer.Execute();
+
+                    headerResultFromWatch = await allDataReceived.Task;
+                    allDataReceived = new TaskCompletionSource<IDataExtractor>();
+
+                    lastTransmissionHasCrcError = casioConvoyAndCasioDataRequestObserver.HasCrcError;
+                } while (lastTransmissionHasCrcError);
+
+                casioConvoyAndCasioDataRequestObserver.ProgressChanged -= CasioConvoyAndCasioDataRequestObserver_ProgressChanged;
+
+                if (headerResultFromWatch != null && headerResultFromWatch is LogAndPointMemoryHeaderParser dataExtractor)
+                {
+                    var result = new List<LogHeaderDataInfo>();
+
+                    for (var i = 1; i <= 20; i++)
                     {
-                        headerToAdd.OrdinalNumber = i;
-                        headerToAdd.LogAddress = dataExtractor.GetLogAddress(i);
-                        headerToAdd.LogTotalLength = dataExtractor.GetLogTotalLength(i);
-                        result.Add(headerToAdd);
-                    }
-                }
+                        var headerToAdd = dataExtractor.GetLogHeaderDataInfo(i);
 
-                if (result.Count > 0)
-                {
-                    return result;
+                        if (headerToAdd != null)
+                        {
+                            headerToAdd.OrdinalNumber = i;
+                            headerToAdd.LogAddress = dataExtractor.GetLogAddress(i);
+                            headerToAdd.LogTotalLength = dataExtractor.GetLogTotalLength(i);
+                            result.Add(headerToAdd);
+                        }
+                    }
+
+                    if (result.Count > 0)
+                    {
+                        return result;
+                    }
+
+                    return null;
                 }
 
                 return null;
             }
-
-            return null;
+            catch(Exception ex)
+            {
+                logger.LogError(ex, "An unexpected error occured during getting header data from the watch");
+                return null;
+            }
         }
 
         public async Task<List<LogData>> GetLogDataAsync(int headerDataSize, int headerDataCount, int logAddress, int logTotalLength)
         {
-            logger.LogDebug("GetLogDataAsync -- Before SendInitializationCommandsToWatch");
-
-            await remoteWatchController.SendInitializationCommandsToWatch();
-
-            logger.LogDebug("GetLogDataAsync -- After SendInitializationCommandsToWatch");
-
-            //REceive StartReadyToTransDataSequence
-
-            var allDataReceived = new TaskCompletionSource<IDataExtractor>();
-
-            logger.LogDebug("GetLogDataAsync -- Before creating observer");
-            var casioConvoyAndCasioDataRequestObserver =
-                new CasioConvoyAndCasioDataRequestObserver(
-                    new LogDataExtractor(headerDataSize, headerDataCount, loggerFactory),
-                        remoteWatchController, allDataReceived, loggerFactory, 16, logTotalLength);
-
-            casioConvoyAndCasioDataRequestObserver.ProgressChanged += CasioConvoyAndCasioDataRequestObserver_ProgressChanged;
-            logger.LogDebug("GetLogDataAsync -- After creating observer");
-
-            await remoteWatchController.SubscribeToCharacteristicChanges(casioConvoyAndCasioDataRequestObserver);
-
-            IDataExtractor logDataResultFromWatch = null;
-            var lastTransmissionHasCrcError = false;
-            do
+            try
             {
-                logger.LogDebug("GetLogDataAsync -- Before SendDownloadLogCommandsToWatch");
+                logger.LogDebug("GetLogDataAsync -- Before SendInitializationCommandsToWatch");
 
-                casioConvoyAndCasioDataRequestObserver.RestartDataReceiving(allDataReceived);
+                await remoteWatchController.SendInitializationCommandsToWatch();
 
-                FireProgressChangedEvent("Sending download commands to watch.");
-                await remoteWatchController.SendDownloadLogCommandsToWatch();
-                logger.LogDebug("GetLogDataAsync -- After SendDownloadLogCommandsToWatch");
+                logger.LogDebug("GetLogDataAsync -- After SendInitializationCommandsToWatch");
 
-                logger.LogDebug("GetLogDataAsync -- Before SendPointMemoryOrLogDownload");
-                FireProgressChangedEvent("Sending point memory or log download command.");
-                await remoteWatchController.SendPointMemoryOrLogDownload(logAddress, logTotalLength);
-                logger.LogDebug("GetLogDataAsync -- After SendPointMemoryOrLogDownload");
+                //REceive StartReadyToTransDataSequence
 
-                logDataResultFromWatch = await allDataReceived.Task;
-                allDataReceived = new TaskCompletionSource<IDataExtractor>();
+                var allDataReceived = new TaskCompletionSource<IDataExtractor>();
 
-                lastTransmissionHasCrcError = casioConvoyAndCasioDataRequestObserver.HasCrcError;
-            } while (lastTransmissionHasCrcError);
+                logger.LogDebug("GetLogDataAsync -- Before creating observer");
+                var casioConvoyAndCasioDataRequestObserver =
+                    new CasioConvoyAndCasioDataRequestObserver(
+                        new LogDataExtractor(headerDataSize, headerDataCount, loggerFactory),
+                            remoteWatchController, allDataReceived, loggerFactory, 16, logTotalLength);
 
-            casioConvoyAndCasioDataRequestObserver.ProgressChanged -= CasioConvoyAndCasioDataRequestObserver_ProgressChanged;
+                casioConvoyAndCasioDataRequestObserver.ProgressChanged += CasioConvoyAndCasioDataRequestObserver_ProgressChanged;
+                logger.LogDebug("GetLogDataAsync -- After creating observer");
 
-            if (logDataResultFromWatch != null && logDataResultFromWatch is LogDataExtractor dataExtractor)
-            {
-                return dataExtractor.GetAllLogData();
+                await remoteWatchController.SubscribeToCharacteristicChanges(casioConvoyAndCasioDataRequestObserver);
+
+                IDataExtractor logDataResultFromWatch = null;
+                var lastTransmissionHasCrcError = false;
+                do
+                {
+                    logger.LogDebug("GetLogDataAsync -- Before SendDownloadLogCommandsToWatch");
+
+                    casioConvoyAndCasioDataRequestObserver.RestartDataReceiving(allDataReceived);
+
+                    FireProgressChangedEvent("Sending download commands to watch.");
+                    await remoteWatchController.SendDownloadLogCommandsToWatch();
+                    logger.LogDebug("GetLogDataAsync -- After SendDownloadLogCommandsToWatch");
+
+                    logger.LogDebug("GetLogDataAsync -- Before SendPointMemoryOrLogDownload");
+                    FireProgressChangedEvent("Sending point memory or log download command.");
+                    await remoteWatchController.SendPointMemoryOrLogDownload(logAddress, logTotalLength);
+                    logger.LogDebug("GetLogDataAsync -- After SendPointMemoryOrLogDownload");
+
+                    logDataResultFromWatch = await allDataReceived.Task;
+                    allDataReceived = new TaskCompletionSource<IDataExtractor>();
+
+                    lastTransmissionHasCrcError = casioConvoyAndCasioDataRequestObserver.HasCrcError;
+                } while (lastTransmissionHasCrcError);
+
+                casioConvoyAndCasioDataRequestObserver.ProgressChanged -= CasioConvoyAndCasioDataRequestObserver_ProgressChanged;
+
+                if (logDataResultFromWatch != null && logDataResultFromWatch is LogDataExtractor dataExtractor)
+                {
+                    return dataExtractor.GetAllLogData();
+                }
+
+                return null;
             }
-
-            return null;
+            catch(Exception ex)
+            {
+                logger.LogError(ex, "An unexpected error occured during getting log data from the watch");
+                return null;
+            }
         }
 
         private void FireProgressChangedEvent(string message)
