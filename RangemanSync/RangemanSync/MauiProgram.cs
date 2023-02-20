@@ -64,6 +64,7 @@ public static class MauiProgram
 #endif
 
         builder.Services.AddSingleton<BluetoothConnectorService>();
+        builder.Services.AddSingleton<ProgressMessagesService>();
 		builder.Services.AddSingleton<MainPageViewModel>();
 		builder.Services.AddSingleton<MainPage>();
         builder.Services.AddSingleton<ConfigPageViewModel>();

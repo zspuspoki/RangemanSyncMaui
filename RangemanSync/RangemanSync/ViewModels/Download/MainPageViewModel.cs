@@ -19,21 +19,25 @@ namespace RangemanSync.ViewModels.Download
         public LogHeaderViewModel SelectedLogHeader { get; set; }
 
         public MainPageViewModel(ILoggerFactory loggerFactory, 
-            BluetoothConnectorService bluetoothConnectorService, ISaveTextFileService saveFileService)
+            BluetoothConnectorService bluetoothConnectorService, ISaveTextFileService saveFileService, ProgressMessagesService progressMessagesService)
         {
             this.logger = loggerFactory.CreateLogger<MainPageViewModel>();
             this.loggerFactory = loggerFactory;
             this.bluetoothConnectorService = bluetoothConnectorService;
             this.saveFileService = saveFileService;
+            this.progressMessagesService = progressMessagesService;
             DownloadHeadersCommand = new AsyncRelayCommand(DownloadHeaders_Clicked);
             SaveGPXCommand = new AsyncRelayCommand(DownloadSaveGPXButton_Clicked);
             DisconnectCommand = new AsyncRelayCommand(DisconnectButton_Clicked);
+
+            progressMessage = progressMessagesService.InitalStartMessage;
         }
 
         private ILogger<MainPageViewModel> logger;
         private readonly ILoggerFactory loggerFactory;
         private readonly BluetoothConnectorService bluetoothConnectorService;
         private readonly ISaveTextFileService saveFileService;
+        private readonly ProgressMessagesService progressMessagesService;
         private DateTime lastHeaderDownloadTime;
         private bool saveGPXButtonCanBePressed = true;
 
@@ -53,7 +57,7 @@ namespace RangemanSync.ViewModels.Download
         {
             logger.LogInformation("--- MainPage - start DownloadHeaders_Clicked");
 
-            SetProgressMessage("Looking for Casio GPR-B1000 device. Please connect your watch.");
+            SetProgressMessage(progressMessagesService.PleaseConnectWatch);
 
             await bluetoothConnectorService.FindAndConnectToWatch(SetProgressMessage,async (connection) =>
             {
@@ -67,11 +71,12 @@ namespace RangemanSync.ViewModels.Download
                 if (headers != null && headers.Count > 0)
                 {
                     headers.ForEach(h => LogHeaderList.Add(h.ToViewModel()));
+                    await bluetoothConnectorService.DisconnectFromWatch(SetProgressMessage);
                 }
                 else
                 {
                     logger.LogDebug("Headers downloading resulted 0 headers");
-                    SetProgressMessage("Headers downloading resulted 0 headers. Please make sure you have recorded routes on the watch. If yes, then please try again because the transmission has been terminated by the watch.");
+                    SetProgressMessage(progressMessagesService.ZeroHeaders);
                 }
 
                 logPointMemoryService.ProgressChanged -= LogPointMemoryService_ProgressChanged;
@@ -84,7 +89,7 @@ namespace RangemanSync.ViewModels.Download
             },
             () =>
             {
-                SetProgressMessage("An error occured during sending watch commands. Please try to connect again");
+                SetProgressMessage(progressMessagesService.WatchCommandSendingError);
                 return Task.FromResult(true);
             },
             () =>
@@ -102,7 +107,7 @@ namespace RangemanSync.ViewModels.Download
             if (SelectedLogHeader == null)
             {
                 logger.LogDebug("DownloadSaveGPXButton_Clicked : One log header entry should be selected");
-                SetProgressMessage("Please select a log header from the list or start downloading the list by using the download headers button if you haven't done it yet.");
+                SetProgressMessage(progressMessagesService.PleaseSelectLogHeader);
                 return;
             }
 
@@ -111,11 +116,11 @@ namespace RangemanSync.ViewModels.Download
             if (timeElapsedSinceLastHeaderDownloadTime.TotalMinutes > 30)
             {
                 logger.LogDebug($"--- Old header data detected. Elapsed minutes = {timeElapsedSinceLastHeaderDownloadTime}");
-                SetProgressMessage("The header data is more than 30 minutes old. Please download the headers again by pressing the Download headers button.");
+                SetProgressMessage(progressMessagesService.ThirtyMinutesOldHeader);
                 return;
             }
 
-            SetProgressMessage("Looking for Casio GPR-B1000 device. Please connect your watch.");
+            SetProgressMessage(progressMessagesService.PleaseConnectWatch);
 
             saveGPXButtonCanBePressed = false;
             DisableOtherTabs();
@@ -138,11 +143,12 @@ namespace RangemanSync.ViewModels.Download
                 if (logDataEntries != null)
                 {
                     logger.LogDebug("-- Inside DownloadSaveAsGPXButton: logDataEntries is not null! Calling SaveGPXFile()");
+                    await bluetoothConnectorService.DisconnectFromWatch(SetProgressMessage);
                     SaveGPXFile(logDataEntries);
                 }
                 else
                 {
-                    ProgressMessage = "The data downloading from the watch has been ended without receiving all of the data including the end transmission command. Please try again by pressing the download as GPX button again.";
+                    ProgressMessage = progressMessagesService.TransmissionEndedWithoutReceivingAllData;
                     logger.LogDebug("-- Inside DownloadSaveAsGPXButton: logDataEntries is null");
                 }
 
@@ -153,7 +159,7 @@ namespace RangemanSync.ViewModels.Download
             },
             async () =>
             {
-                SetProgressMessage("An error occured during sending watch commands. Please try to connect again");
+                SetProgressMessage(progressMessagesService.WatchCommandSendingError);
                 return true;
             },
             () => 
@@ -214,6 +220,7 @@ namespace RangemanSync.ViewModels.Download
             var gpxString = gpx.ToXml();
 #if WINDOWS
             saveFileService.SaveFile(fileName, gpxString);
+            SetProgressMessage(progressMessagesService.GPXSuccessfullySaved);
 #else
             Preferences.Default.Set(Constants.PrefKeyGPX, gpxString);
             saveFileService.SaveFile(fileName);

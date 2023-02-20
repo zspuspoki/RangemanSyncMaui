@@ -11,15 +11,15 @@ namespace RangemanSync.Services
         private const string WatchDeviceName = "CASIO GPR-B1000";
         
         private readonly ILogger<BluetoothConnectorService> logger;
+        private readonly ProgressMessagesService progressMessagesService;
         private CancellationTokenSource scanCancellationTokenSource = null;
         private IDevice currentDevice;
-        private IBluetoothLE bluetoothLE;
         private IAdapter adapter;
 
-        public BluetoothConnectorService(ILogger<BluetoothConnectorService> logger)
+        public BluetoothConnectorService(ILogger<BluetoothConnectorService> logger, ProgressMessagesService progressMessagesService)
         {
             this.logger = logger;
-            bluetoothLE = CrossBluetoothLE.Current;
+            this.progressMessagesService = progressMessagesService;
             adapter = CrossBluetoothLE.Current.Adapter;
             adapter.ScanTimeout = 70000;
             adapter.DeviceDiscovered += Adapter_DeviceDiscovered;
@@ -62,19 +62,20 @@ namespace RangemanSync.Services
 
             if(currentDevice != null)
             {
-                progressMessageMethod("Found Casio device. Trying to connect ...");
+                progressMessageMethod(progressMessagesService.FoundCasioDevice);
 
                 try
                 {
                     await adapter.ConnectToDeviceAsync(currentDevice);
 
-                    progressMessageMethod("Successfully connected to the watch.");
+                    progressMessageMethod(progressMessagesService.SuccessfullyConnectedToWatch);
 
                     await successfullyConnectedMethod(currentDevice);
                 }
                 catch(DeviceConnectionException e)
                 {
                     logger.LogDebug("Failed to connect to watch");
+                    progressMessageMethod(progressMessagesService.FailedToConnectToWatch);
                 }
             }
 
@@ -94,7 +95,7 @@ namespace RangemanSync.Services
                 if (scanCancellationTokenSource != null && !scanCancellationTokenSource.IsCancellationRequested)
                 {
                     scanCancellationTokenSource.Cancel();
-                    progressMessageMethod("Bluetooth: GPR-B1000 device scanning successfully aborted.");
+                    progressMessageMethod(progressMessagesService.ConnectionSuccessfullyAborted);
                 }
 
                 foreach(var device in adapter.ConnectedDevices)
@@ -105,7 +106,7 @@ namespace RangemanSync.Services
             catch (Exception ex)
             {
                 logger.LogError(ex, "An unexpected error occured during disconnecting the watch.");
-                progressMessageMethod("An unexpected error occured during disconnecting the watch.");
+                progressMessageMethod(progressMessagesService.ErrorOccuredDuringDisconnectingWatch);
             }
         }
 
