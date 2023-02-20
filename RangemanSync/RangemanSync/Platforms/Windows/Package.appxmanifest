@@ -6,13 +6,13 @@
   xmlns:rescap="http://schemas.microsoft.com/appx/manifest/foundation/windows10/restrictedcapabilities"
   IgnorableNamespaces="uap rescap">
 
-  <Identity Name="maui-package-name-placeholder" Publisher="CN=Szilamer" Version="0.0.0.0" />
+  <Identity Name="30006ZsoltPSoftwareSoluti.CasioGPR-B1000GPXport" Publisher="CN=E4FF4F3A-5832-43A6-AAEC-55EB2974FA98" Version="1.1.6.0" />
 
-  <mp:PhoneIdentity PhoneProductId="B957262F-86D6-42D7-AFB3-9B0BC22A7DBF" PhonePublisherId="00000000-0000-0000-0000-000000000000"/>
+  <mp:PhoneIdentity PhoneProductId="21afb082-2882-45e2-8393-4534565a7ee8" PhonePublisherId="00000000-0000-0000-0000-000000000000"/>
 
   <Properties>
-    <DisplayName>$placeholder$</DisplayName>
-    <PublisherDisplayName>User Name</PublisherDisplayName>
+    <DisplayName>Casio GPR-B1000 GPXport</DisplayName>
+    <PublisherDisplayName>Zsolt P Software Solutions</PublisherDisplayName>
     <Logo>$placeholder$.png</Logo>
   </Properties>
 
@@ -28,7 +28,7 @@
   <Applications>
     <Application Id="App" Executable="$targetnametoken$.exe" EntryPoint="$targetentrypoint$">
       <uap:VisualElements
-        DisplayName="$placeholder$"
+        DisplayName="Casio GPR-B1000 GPXport"
         Description="$placeholder$"
         Square150x150Logo="$placeholder$.png"
         Square44x44Logo="$placeholder$.png"

@@ -70,6 +70,39 @@ public static class MauiProgram
         builder.Services.AddSingleton<ConfigPageViewModel>();
         builder.Services.AddSingleton<ConfigPage>();
 
+        MauiExceptions.UnhandledException += MauiExceptions_UnhandledException ;
+
         return builder.Build();
 	}
+
+    private static string GetUnhandledExceptionLogPath()
+    {
+        const string errorFileName = "Fatal.log";
+        var libraryPath = Environment.GetFolderPath(Environment.SpecialFolder.Personal); // iOS: Environment.SpecialFolder.Resources
+        return Path.Combine(libraryPath, errorFileName);
+    }
+
+    private static void LogUnhandledException(Exception exception)
+    {
+        try
+        {
+            if (exception != null)
+            {
+                var errorFilePath = GetUnhandledExceptionLogPath();
+                var errorMessage = string.Format("Time: {0}\r\nError: Unhandled Exception\r\n{1}",
+                DateTime.Now, exception.ToString());
+                File.WriteAllText(errorFilePath, errorMessage);
+            }
+        }
+        catch
+        {
+            // just suppress any error logging exceptions
+        }
+    }
+
+    private static void MauiExceptions_UnhandledException(object sender, UnhandledExceptionEventArgs e)
+    {
+        LogUnhandledException(e.ExceptionObject as Exception);
+        Application.Current.MainPage.DisplayAlert("Error", $"An unexpected error occured during app execution. Sorry for the inconvenience. \nThe log file was saved here: {GetUnhandledExceptionLogPath()}", "OK");
+    }
 }
