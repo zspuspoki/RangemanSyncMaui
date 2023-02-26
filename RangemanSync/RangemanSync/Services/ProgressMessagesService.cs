@@ -16,5 +16,10 @@
         public string ThirtyMinutesOldHeader { get; } = "The header data is more than 30 minutes old. Please download the headers again by pressing the Download headers button.";
         public string TransmissionEndedWithoutReceivingAllData { get; } = "The data downloading from the watch has been ended without receiving all of the data including the end transmission command. Please try again by pressing the download as GPX button again.";
         public string GPXSuccessfullySaved { get; } = "GPX file has been successfully saved to the selected folder.";
+
+        public string FailedToStartDeviceScanning { get; } = "An unexpected eror occured during starting the device scanning. Are you sure your bluetooth adapter is switched on ?";
+        public string BTIsOff { get; } = "Bluetooth is switched off. Please switch it on the start scanning for Casio GPR-B1000";
+        public string BtIsNotAvailabe { get; } = "Bluetooth is not available on the machine. Bluetooth is needed to start scanning the Casio GPR-B1000";
+
     }
 }

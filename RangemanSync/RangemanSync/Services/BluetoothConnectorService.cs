@@ -3,6 +3,7 @@ using Plugin.BLE;
 using Plugin.BLE.Abstractions.Contracts;
 using Plugin.BLE.Abstractions.EventArgs;
 using Plugin.BLE.Abstractions.Exceptions;
+using System.Reflection;
 
 namespace RangemanSync.Services
 {
@@ -50,15 +51,50 @@ namespace RangemanSync.Services
                 throw new ArgumentNullException(nameof(successfullyConnectedMethod));
             }
 
+            if(!CrossBluetoothLE.Current.IsOn)
+            {
+                progressMessageMethod(progressMessagesService.BTIsOff);
+                return;
+            }
+
+            if (!CrossBluetoothLE.Current.IsAvailable)
+            {
+                progressMessageMethod(progressMessagesService.BtIsNotAvailabe);
+                return;
+            }
+
             if (beforeStartScanningMethod != null)
             {
                 beforeStartScanningMethod();
             }
 
             scanCancellationTokenSource = new CancellationTokenSource();
-            await adapter.StartScanningForDevicesAsync(scanFilterOptions: null, 
-                (device) => device.Name != null && device.Name.Contains(WatchDeviceName), 
-                allowDuplicatesKey: false, scanCancellationTokenSource.Token);
+            try
+            {
+                await adapter.StartScanningForDevicesAsync(scanFilterOptions: null,
+                    (device) => device.Name != null && device.Name.Contains(WatchDeviceName),
+                    allowDuplicatesKey: false, scanCancellationTokenSource.Token);
+            }
+            catch(Exception ex)
+            {
+                logger.LogError(ex, "Failed to start device scanning");
+                progressMessageMethod(progressMessagesService.FailedToStartDeviceScanning);
+
+                scanCancellationTokenSource.Cancel();
+
+                try
+                {
+                    await adapter.StopScanningForDevicesAsync();
+
+                    typeof(Plugin.BLE.Abstractions.AdapterBase).GetField("_isScanning", BindingFlags.Instance | BindingFlags.NonPublic).SetValue(adapter, false);
+
+                }
+                catch(Exception ex2)
+                {
+                    logger.LogError(ex2, "Failed to stop device scanning");
+                }
+            }
+
 
             if(currentDevice != null)
             {
