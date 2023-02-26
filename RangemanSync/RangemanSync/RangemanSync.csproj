@@ -12,10 +12,10 @@
 		<ImplicitUsings>enable</ImplicitUsings>
 
 		<!-- Display name -->
-		<ApplicationTitle>Casio GPR-B1000 GPXport</ApplicationTitle>
+		<ApplicationTitle>Demo of Casio GPR-B1000 GPXport</ApplicationTitle>
 
 		<!-- App Identifier -->
-		<ApplicationId>com.companyname.rangemansync</ApplicationId>
+		<ApplicationId>com.companyname.rangemansyncdemo</ApplicationId>
 		<ApplicationIdGuid>b9920b97-7fef-458a-9103-5dbcd09a5e99</ApplicationIdGuid>
 
 		<!-- Versions -->
