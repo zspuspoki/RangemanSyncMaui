@@ -3,6 +3,7 @@ using MetroLog.MicrosoftExtensions;
 using MetroLog.Operators;
 using Microsoft.Extensions.Logging;
 using RangemanSync.Services;
+using RangemanSync.Services.Common;
 using RangemanSync.ViewModels.Config;
 using RangemanSync.ViewModels.Download;
 
@@ -63,6 +64,7 @@ public static class MauiProgram
 		builder.Services.AddTransient<ISaveTextFileService, RangemanSync.Platforms.Android.SaveFileService>();
 #endif
 
+        builder.Services.AddSingleton<WatchControllerUtilities>();
         builder.Services.AddSingleton<BluetoothConnectorService>();
         builder.Services.AddSingleton<ProgressMessagesService>();
 		builder.Services.AddSingleton<MainPageViewModel>();

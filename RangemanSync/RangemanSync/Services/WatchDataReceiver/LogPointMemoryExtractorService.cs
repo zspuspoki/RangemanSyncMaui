@@ -1,5 +1,6 @@
 ﻿using Microsoft.Extensions.Logging;
 using Plugin.BLE.Abstractions.Contracts;
+using RangemanSync.Services.Common;
 using RangemanSync.Services.WatchDataReceiver.DataExtractors;
 using RangemanSync.Services.WatchDataReceiver.DataExtractors.Data;
 using RangemanSync.Services.WatchDataReceiver.DataExtractors.Header;
@@ -13,11 +14,12 @@ namespace RangemanSync.Services.WatchDataReceiver
         private ILogger<LogPointMemoryExtractorService> logger;
         private readonly ILoggerFactory loggerFactory;
 
-        public LogPointMemoryExtractorService(IDevice currentDevice, ILoggerFactory loggerFactory)
+        public LogPointMemoryExtractorService(IDevice currentDevice, IWatchControllerUtilities watchControllerUtilities, 
+            ILoggerFactory loggerFactory)
         {
             logger = loggerFactory.CreateLogger<LogPointMemoryExtractorService>();
             this.loggerFactory = loggerFactory;
-            remoteWatchController = new RemoteWatchController(currentDevice, loggerFactory);
+            remoteWatchController = new RemoteWatchController(currentDevice, watchControllerUtilities, loggerFactory);
         }
 
         public async Task<List<LogHeaderDataInfo>> GetHeaderDataAsync()

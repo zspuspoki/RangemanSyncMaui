@@ -6,6 +6,7 @@ using RangemanSync.Services.WatchDataReceiver;
 using RangemanSync.Services.WatchDataReceiver.DataExtractors.Data;
 using System.Collections.ObjectModel;
 using SharpGPX;
+using RangemanSync.Services.Common;
 
 namespace RangemanSync.ViewModels.Download
 {
@@ -19,13 +20,15 @@ namespace RangemanSync.ViewModels.Download
         public LogHeaderViewModel SelectedLogHeader { get; set; }
 
         public MainPageViewModel(ILoggerFactory loggerFactory, 
-            BluetoothConnectorService bluetoothConnectorService, ISaveTextFileService saveFileService, ProgressMessagesService progressMessagesService)
+            BluetoothConnectorService bluetoothConnectorService, ISaveTextFileService saveFileService, 
+            ProgressMessagesService progressMessagesService, IWatchControllerUtilities watchControllerUtilities)
         {
             this.logger = loggerFactory.CreateLogger<MainPageViewModel>();
             this.loggerFactory = loggerFactory;
             this.bluetoothConnectorService = bluetoothConnectorService;
             this.saveFileService = saveFileService;
             this.progressMessagesService = progressMessagesService;
+            this.watchControllerUtilities = watchControllerUtilities;
             DownloadHeadersCommand = new AsyncRelayCommand(DownloadHeaders_Clicked);
             SaveGPXCommand = new AsyncRelayCommand(DownloadSaveGPXButton_Clicked);
             DisconnectCommand = new AsyncRelayCommand(DisconnectButton_Clicked);
@@ -38,6 +41,7 @@ namespace RangemanSync.ViewModels.Download
         private readonly BluetoothConnectorService bluetoothConnectorService;
         private readonly ISaveTextFileService saveFileService;
         private readonly ProgressMessagesService progressMessagesService;
+        private readonly IWatchControllerUtilities watchControllerUtilities;
         private DateTime lastHeaderDownloadTime;
         private bool saveGPXButtonCanBePressed = true;
 
@@ -61,7 +65,7 @@ namespace RangemanSync.ViewModels.Download
 
             await bluetoothConnectorService.FindAndConnectToWatch(SetProgressMessage,async (connection) =>
             {
-                var logPointMemoryService = new LogPointMemoryExtractorService(connection, loggerFactory);
+                var logPointMemoryService = new LogPointMemoryExtractorService(connection, watchControllerUtilities, loggerFactory);
                 logPointMemoryService.ProgressChanged += LogPointMemoryService_ProgressChanged;
                 var headersTask = logPointMemoryService.GetHeaderDataAsync();
                 var headers = await headersTask;
@@ -129,7 +133,7 @@ namespace RangemanSync.ViewModels.Download
             {
                 logger.LogDebug("DownloadSaveGPXButton_Clicked : Before GetLogDataAsync");
                 logger.LogDebug($"Selected ordinal number: {SelectedLogHeader.OrdinalNumber}");
-                var logPointMemoryService = new LogPointMemoryExtractorService(connection, loggerFactory);
+                var logPointMemoryService = new LogPointMemoryExtractorService(connection, watchControllerUtilities, loggerFactory);
                 logPointMemoryService.ProgressChanged += LogPointMemoryService_ProgressChanged;
                 var selectedHeader = SelectedLogHeader;
                 var logDataEntries = await logPointMemoryService.GetLogDataAsync(
