@@ -11,6 +11,7 @@ namespace RangemanSync.ViewModels.Map
 {
     public partial class MapPageViewModel : BaseViewModel
     {
+        public IMapPageView MapPageView { get; set; }
         public NodesViewModel NodesViewModel { get => nodesViewModel; }
 
         public bool ShowCalculatedDistances
@@ -55,7 +56,6 @@ namespace RangemanSync.ViewModels.Map
         private bool disconnectButtonIsVisible = false;
 
         private NodesViewModel nodesViewModel;
-        private readonly IMapPageView mapPageView;
         private readonly BluetoothConnectorService bluetoothConnectorService;
         private readonly ILoggerFactory loggerFactory;
         private readonly ILocationService locationService;
@@ -77,7 +77,6 @@ namespace RangemanSync.ViewModels.Map
         private ICommand disconnectCommand;
 
         public MapPageViewModel(NodesViewModel nodesViewModel,
-            IMapPageView mapPageView,
             BluetoothConnectorService bluetoothConnectorService,
             ILoggerFactory loggerFactory, ILocationService locationService,
             IWatchControllerUtilities watchControllerUtilities)
@@ -87,7 +86,6 @@ namespace RangemanSync.ViewModels.Map
             logger.LogInformation("Inside Map page VM ctor");
 
             this.nodesViewModel = nodesViewModel;
-            this.mapPageView = mapPageView;
             this.bluetoothConnectorService = bluetoothConnectorService;
             this.loggerFactory = loggerFactory;
             this.locationService = locationService;
@@ -136,12 +134,12 @@ namespace RangemanSync.ViewModels.Map
 
         public void UpdateMapToUseMbTilesFile()
         {
-            mapPageView.UpdateMapToUseMbTilesFile();
+            MapPageView.UpdateMapToUseMbTilesFile();
         }
 
         public void UpdateMapToUseWebBasedMbTiles()
         {
-            mapPageView.UpdateMapToUseWebBasedMbTiles();
+            MapPageView.UpdateMapToUseWebBasedMbTiles();
         }
 
         public bool ToggleAddressPanelVisibility()
@@ -182,7 +180,7 @@ namespace RangemanSync.ViewModels.Map
 
             if (!NodesViewModel.HasRoute())
             {
-                await mapPageView.DisplayAlert("Alert", "Please create a route before pressing Send.", "OK");
+                await MapPageView.DisplayAlert("Alert", "Please create a route before pressing Send.", "OK");
                 return;
             }
 
@@ -225,8 +223,8 @@ namespace RangemanSync.ViewModels.Map
             {
                 deleteButtonCanbePressed = false;
                 NodesViewModel.DeleteSelectedNode();
-                mapPageView.RemoveSelectedPin();
-                mapPageView.AddLinesBetweenPinsAsLayer();
+                MapPageView.RemoveSelectedPin();
+                MapPageView.AddLinesBetweenPinsAsLayer();
                 ProgressMessage = "Successfully deleted node.";
                 deleteButtonCanbePressed = true;
             }

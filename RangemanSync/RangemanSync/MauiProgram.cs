@@ -76,8 +76,24 @@ public static class MauiProgram
 		builder.Services.AddSingleton<MainPage>();
         builder.Services.AddSingleton<ConfigPageViewModel>();
         builder.Services.AddSingleton<ConfigPage>();
+        builder.Services.AddSingleton<NodesViewModel>();
+
         builder.Services.AddSingleton<MapPageViewModel>();
-        builder.Services.AddSingleton<MapPage>();
+        builder.Services.AddSingleton<MapPage>((sp) => 
+        {
+            var logger = sp.GetRequiredService<ILogger<MapPage>>();
+            var locationService = sp.GetRequiredService<ILocationService>();
+            var mapPage = new MapPage(logger, locationService);
+            var mapPageViewModel = sp.GetRequiredService<MapPageViewModel>();
+            mapPageViewModel.MapPageView = mapPage;
+            mapPage.BindingContext = mapPageViewModel;
+            return mapPage;
+        });
+
+        builder.Services.AddSingleton<IMapPageView, MapPage>((sp) =>
+        {
+            return sp.GetRequiredService<MapPage>();
+        });
 
         MauiExceptions.UnhandledException += MauiExceptions_UnhandledException ;
 

@@ -1,7 +1,6 @@
 using Mapsui.Extensions;
 using Mapsui.Layers;
 using Mapsui.Projections;
-using Mapsui.Providers;
 using Mapsui.Styles;
 using Mapsui.Tiling.Layers;
 using Mapsui.Tiling;
@@ -10,8 +9,6 @@ using Microsoft.Extensions.Logging;
 using NetTopologySuite.Geometries;
 using RangemanSync.ViewModels.Map;
 using RangemanSync.Services.DeviceLocation;
-using Point = NetTopologySuite.Geometries.Point;
-using NetTopologySuite.Features;
 using Mapsui.Nts;
 
 namespace RangemanSync;
@@ -145,6 +142,12 @@ public partial class MapPage : ContentPage, IMapPageView
                 var coordinate = new Coordinate(coordinates.x, coordinates.y);
                 points.Add(coordinate);
             }
+        }
+
+        var allpoints = points.ToArray();
+        if (allpoints.Length <= 1)
+        {
+            return;
         }
 
         GeometryFeature lineStringFeature = new GeometryFeature()
