@@ -9,6 +9,7 @@
     <TabBar>
         <Tab Title="Main menu">
             <ShellContent Title="Download GPX" ContentTemplate="{DataTemplate local:MainPage}" Route="MainPage" />
+            <ShellContent Title="Map" ContentTemplate="{DataTemplate local:MapPage}" Route="MapPage" />
             <ShellContent Title="Configuration" ContentTemplate="{DataTemplate local:ConfigPage}" Route="Config" />
         </Tab>
     </TabBar>

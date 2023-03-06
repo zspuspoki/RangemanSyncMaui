@@ -4,8 +4,11 @@ using MetroLog.Operators;
 using Microsoft.Extensions.Logging;
 using RangemanSync.Services;
 using RangemanSync.Services.Common;
+using RangemanSync.Services.DeviceLocation;
 using RangemanSync.ViewModels.Config;
 using RangemanSync.ViewModels.Download;
+using RangemanSync.ViewModels.Map;
+using SkiaSharp.Views.Maui.Controls.Hosting;
 
 namespace RangemanSync;
 
@@ -17,7 +20,8 @@ public static class MauiProgram
         builder.UseMauiApp<App>().UseMauiCommunityToolkit();
         builder
 			.UseMauiApp<App>()
-			.ConfigureFonts(fonts =>
+            .UseSkiaSharp(true)
+            .ConfigureFonts(fonts =>
 			{
 				fonts.AddFont("OpenSans-Regular.ttf", "OpenSansRegular");
 				fonts.AddFont("OpenSans-Semibold.ttf", "OpenSansSemibold");
@@ -64,13 +68,16 @@ public static class MauiProgram
 		builder.Services.AddTransient<ISaveTextFileService, RangemanSync.Platforms.Android.SaveFileService>();
 #endif
 
-        builder.Services.AddSingleton<WatchControllerUtilities>();
+        builder.Services.AddSingleton<ILocationService, LocationService>();
+        builder.Services.AddSingleton<IWatchControllerUtilities, WatchControllerUtilities>();
         builder.Services.AddSingleton<BluetoothConnectorService>();
         builder.Services.AddSingleton<ProgressMessagesService>();
 		builder.Services.AddSingleton<MainPageViewModel>();
 		builder.Services.AddSingleton<MainPage>();
         builder.Services.AddSingleton<ConfigPageViewModel>();
         builder.Services.AddSingleton<ConfigPage>();
+        builder.Services.AddSingleton<MapPageViewModel>();
+        builder.Services.AddSingleton<MapPage>();
 
         MauiExceptions.UnhandledException += MauiExceptions_UnhandledException ;
 

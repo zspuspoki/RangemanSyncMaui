@@ -1,0 +1,64 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:mapsui="clr-namespace:Mapsui.UI.Maui;assembly=Mapsui.UI.Maui"
+             x:Class="RangemanSync.MapPage"
+             Title="MapPage">
+    <Grid RowDefinitions="{Binding GridViewRows}">
+        <AbsoluteLayout>
+            <ContentView AbsoluteLayout.LayoutBounds="0,0,1,1"
+                       AbsoluteLayout.LayoutFlags="All" 
+                       HorizontalOptions="FillAndExpand"
+                       VerticalOptions="FillAndExpand" >
+                <mapsui:MapView x:Name="mapView"
+                     VerticalOptions="FillAndExpand"
+                     HorizontalOptions="Fill"
+                     BackgroundColor="Gray" MapClicked="mapView_MapClicked" />
+            </ContentView>
+
+            <Grid AbsoluteLayout.LayoutBounds=".5, .5, AutoSize, AutoSize"
+                  AbsoluteLayout.LayoutFlags="PositionProportional"
+                  IsVisible="{Binding ProgressBarIsVisible}">
+                <ProgressBar 
+                    Progress="{Binding ProgressBarPercentageNumber}"
+                    HeightRequest="100" 
+                    WidthRequest="100" 
+                    />
+                <Label Text="{Binding ProgressBarPercentageMessage}" FontSize="24" TextColor="Red" Margin="26,30,0,0"/>
+            </Grid>
+
+            <Label AbsoluteLayout.LayoutBounds="0, 0, AutoSize, AutoSize"
+                      AbsoluteLayout.LayoutFlags="PositionProportional" TextColor="Red" 
+                       BackgroundColor="White" Text="{Binding ProgressMessage}" x:Name="lblProgress"/>
+
+            <Button AbsoluteLayout.LayoutBounds="0, 1, AutoSize, AutoSize"
+                      AbsoluteLayout.LayoutFlags="PositionProportional"
+                      HeightRequest="65"
+                      WidthRequest="65"
+                      CornerRadius="25" Text="Send" x:Name="SendButton" 
+                      Command="{Binding Path=SendCommand}"/>
+
+            <Button AbsoluteLayout.LayoutBounds="0.5 , 1 , AutoSize, AutoSize"
+                      AbsoluteLayout.LayoutFlags="PositionProportional"
+                      HeightRequest="65"
+                      WidthRequest="65"
+                      CornerRadius="25" Text="Del node" x:Name="DeleteNodeButton" 
+                      Command="{Binding Path=DeleteCommand}"/>
+
+            <Button AbsoluteLayout.LayoutBounds="1 , 1 , AutoSize, AutoSize"
+                      AbsoluteLayout.LayoutFlags="PositionProportional"
+                      HeightRequest="65"
+                      WidthRequest="65"
+                      CornerRadius="25" x:Name="SelectNodeButton" Text="{Binding NodesViewModel.CurrentSelectedNode}" 
+                      Command="{Binding Path=SelectCommand}"/>
+
+            <Button AbsoluteLayout.LayoutBounds="1 , 1 , AutoSize, AutoSize"
+                      AbsoluteLayout.LayoutFlags="PositionProportional"
+                      HeightRequest="65"
+                      WidthRequest="65"
+                      CornerRadius="25" x:Name="DisconnectButton" Text="End"  
+                      Command="{Binding Path=DisconnectCommand}"/>
+
+        </AbsoluteLayout>
+    </Grid>
+</ContentPage>

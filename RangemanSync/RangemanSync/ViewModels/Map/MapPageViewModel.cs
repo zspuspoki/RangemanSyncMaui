@@ -1,4 +1,5 @@
 ﻿using CommunityToolkit.Mvvm.ComponentModel;
+using CommunityToolkit.Mvvm.Input;
 using Microsoft.Extensions.Logging;
 using RangemanSync.Services;
 using RangemanSync.Services.Common;
@@ -10,6 +11,25 @@ namespace RangemanSync.ViewModels.Map
 {
     public partial class MapPageViewModel : BaseViewModel
     {
+        public NodesViewModel NodesViewModel { get => nodesViewModel; }
+
+        public bool ShowCalculatedDistances
+        {
+            get
+            {
+                return showCalculatedDistance;
+            }
+            set
+            {
+                showCalculatedDistance = value;
+            }
+        }
+
+        public IAsyncRelayCommand SendCommand { get; }
+        public IAsyncRelayCommand DeleteCommand { get; }
+        public IAsyncRelayCommand SelectCommand { get; }
+        public IAsyncRelayCommand DisconnectCommand { get; }
+
         private bool showCalculatedDistance = false;
         private bool addressPanelIsVisible = false;
 
@@ -72,11 +92,17 @@ namespace RangemanSync.ViewModels.Map
             this.loggerFactory = loggerFactory;
             this.locationService = locationService;
             this.watchControllerUtilities = watchControllerUtilities;
+
             gridViewRows = new RowDefinitionCollection
             {
                 new RowDefinition { Height = new GridLength(2, GridUnitType.Star) },
                 new RowDefinition { Height = 0 }
             };
+
+            SendCommand = new AsyncRelayCommand(SendButton_Clicked);
+            DeleteCommand = new AsyncRelayCommand(DeleteNodeButton_Clicked);
+            SelectCommand = new AsyncRelayCommand(SelectNodeButton_Clicked);
+            DisconnectCommand = new AsyncRelayCommand(DisconnectButton_Clicked);
         }
 
         public void ShowDistanceFromCurrentPosition(double longitude, double latitude)
@@ -144,7 +170,7 @@ namespace RangemanSync.ViewModels.Map
 
         #region Button commands
         #region Button click handlers
-        private async void SendButton_Clicked()
+        private async Task SendButton_Clicked()
         {
             logger.LogInformation("--- MapPage - start SendButton_Clicked");
 
@@ -193,7 +219,7 @@ namespace RangemanSync.ViewModels.Map
             sendButtonCanbePressed = true;
         }
 
-        private void DeleteNodeButton_Clicked()
+        private async Task DeleteNodeButton_Clicked()
         {
             try
             {
@@ -211,14 +237,14 @@ namespace RangemanSync.ViewModels.Map
             }
         }
 
-        private void SelectNodeButton_Clicked()
+        private async Task SelectNodeButton_Clicked()
         {
             selectButtonCanbePressed = false;
             NodesViewModel.ClickOnSelectNode();
             selectButtonCanbePressed = true;
         }
 
-        private async void DisconnectButton_Clicked()
+        private async Task DisconnectButton_Clicked()
         {
             disconnectButtonCanbePressed = false;
             await bluetoothConnectorService.DisconnectFromWatch((m) => ProgressMessage = m);
@@ -243,77 +269,5 @@ namespace RangemanSync.ViewModels.Map
 
         #endregion
 
-        #region Properties
-
-        public NodesViewModel NodesViewModel { get => nodesViewModel; }
-
-
-        #region Button Commands
-        public ICommand SendCommand
-        {
-            get
-            {
-                if (sendCommand == null)
-                {
-                    sendCommand = new Command((o) => SendButton_Clicked(), (o) => sendButtonCanbePressed);
-                }
-
-                return sendCommand;
-            }
-        }
-
-        public ICommand DeleteCommand
-        {
-            get
-            {
-                if (deleteCommand == null)
-                {
-                    deleteCommand = new Command((o) => DeleteNodeButton_Clicked(), (o) => deleteButtonCanbePressed);
-                }
-
-                return deleteCommand;
-            }
-        }
-
-        public ICommand SelectCommand
-        {
-            get
-            {
-                if (selectCommand == null)
-                {
-                    selectCommand = new Command((o) => SelectNodeButton_Clicked(), (o) => selectButtonCanbePressed);
-                }
-
-                return selectCommand;
-            }
-        }
-
-        public ICommand DisconnectCommand
-        {
-            get
-            {
-                if (disconnectCommand == null)
-                {
-                    disconnectCommand = new Command((o) => DisconnectButton_Clicked(), (o) => disconnectButtonCanbePressed);
-                }
-
-                return disconnectCommand;
-            }
-        }
-
-        #endregion
-
-        public bool ShowCalculatedDistances
-        {
-            get
-            {
-                return showCalculatedDistance;
-            }
-            set
-            {
-                showCalculatedDistance = value;
-            }
-        }
-        #endregion
     }
 }
