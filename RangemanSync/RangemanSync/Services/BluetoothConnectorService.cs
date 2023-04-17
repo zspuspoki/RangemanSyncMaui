@@ -104,6 +104,8 @@ namespace RangemanSync.Services
                 {
                     await adapter.ConnectToDeviceAsync(currentDevice);
 
+                    await Task.Delay(15000);
+
                     progressMessageMethod(progressMessagesService.SuccessfullyConnectedToWatch);
 
                     await successfullyConnectedMethod(currentDevice);

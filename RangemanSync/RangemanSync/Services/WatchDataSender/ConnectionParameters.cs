@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace RangemanSync.Services.WatchDataSender
 {
-    internal class ConnectionParameters
+    public class ConnectionParameters
     {
         private readonly byte[] data;
 

@@ -32,15 +32,13 @@ public static class MauiProgram
             .AddTraceLogger(
                 options =>
                 {
-                    options.MinLevel = LogLevel.Trace;
-                    options.MaxLevel = LogLevel.Critical;
+                    options.MinLevel = LogLevel.Debug;
                 }) // Will write to the Debug Output
 #endif
             .AddInMemoryLogger(
                 options =>
                 {
-                    options.MaxLines = 1024;
-                    options.MinLevel = LogLevel.Debug;
+                    options.MinLevel = LogLevel.Trace;
                     options.MaxLevel = LogLevel.Critical;
                 })
 #if RELEASE
@@ -56,9 +54,10 @@ public static class MauiProgram
             .AddConsoleLogger(
                 options =>
                 {
-                    options.MinLevel = LogLevel.Information;
+                    options.MinLevel = LogLevel.Debug;
                     options.MaxLevel = LogLevel.Critical;
-                }); // Will write to the Console Output (logcat for android)
+                }).SetMinimumLevel(LogLevel.Trace);  // Will write to the Console Output (logcat for android)
+        
 
         builder.Services.AddSingleton(LogOperatorRetriever.Instance);
 
@@ -67,7 +66,6 @@ public static class MauiProgram
 #elif ANDROID
 		builder.Services.AddTransient<ISaveTextFileService, RangemanSync.Platforms.Android.SaveFileService>();
 #endif
-
         builder.Services.AddSingleton<ILocationService, LocationService>();
         builder.Services.AddSingleton<IWatchControllerUtilities, WatchControllerUtilities>();
         builder.Services.AddSingleton<BluetoothConnectorService>();

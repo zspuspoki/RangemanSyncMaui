@@ -72,8 +72,6 @@ namespace RangemanSync.Services.WatchDataSender
                 await watchControllerUtilities.WriteCharacteristicValue(Guid.Parse(BLEConstants.CasioFeaturesServiceGuid),
                     Guid.Parse(BLEConstants.CasioConvoyCharacteristic), currentByteArrayToSend);
 
-                await Task.Delay(5);
-
                 currentDataToSend.Clear();
                 currentConvoyDataCount = 0;
             }

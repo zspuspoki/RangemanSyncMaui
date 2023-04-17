@@ -4,6 +4,7 @@ namespace RangemanSync.Services.Common
 {
     public class WatchControllerUtilities : IWatchControllerUtilities
     {
+        private const int CommandDelay = 20;
         private IDevice currentDevice;
 
         public WatchControllerUtilities()
@@ -21,8 +22,15 @@ namespace RangemanSync.Services.Common
             }
 
             var service = await currentDevice.GetServiceAsync(serviceGuid);
+            await Task.Delay(CommandDelay);
+
             var characteristic = await service.GetCharacteristicAsync(characteristicGuid);
-            return await characteristic.WriteAsync(data);
+            await Task.Delay(CommandDelay);
+
+            var result = await characteristic.WriteAsync(data);
+            await Task.Delay(CommandDelay);
+
+            return result;
         }
 
         public async Task WriteDescriptorValue(Guid serviceGuid, Guid characteristicGuid,
@@ -34,9 +42,16 @@ namespace RangemanSync.Services.Common
             }
 
             var service = await currentDevice.GetServiceAsync(serviceGuid);
+            await Task.Delay(CommandDelay);
+
             var characteristic = await service.GetCharacteristicAsync(characteristicGuid);
+            await Task.Delay(CommandDelay);
+
             var descriptor = await characteristic.GetDescriptorAsync(descriptorGuid);
+            await Task.Delay(CommandDelay);
+
             await descriptor.WriteAsync(data);
+            await Task.Delay(CommandDelay);
         }
     }
 }
