@@ -64,6 +64,7 @@ public static class MauiProgram
 #if WINDOWS
         builder.Services.AddTransient<ISaveTextFileService, RangemanSync.Platforms.Windows.SaveFileService>();
 #elif ANDROID
+        builder.Services.AddSingleton<MainActivity>();
 		builder.Services.AddTransient<ISaveTextFileService, RangemanSync.Platforms.Android.SaveFileService>();
 #endif
         builder.Services.AddSingleton<ILocationService, LocationService>();
