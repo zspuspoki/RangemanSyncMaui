@@ -22,9 +22,12 @@ namespace RangemanSync.Services.WatchDataSender
             WriteFinalClosingData
         }
 
+        public event EventHandler<DataSenderProgressEventArgs> ProgressChanged;
+
         private const int CommandDelay = 20;
         private WorkflowStep workflowStep = WorkflowStep.SendInitCommandsAndWaitForCCCData;
         private ILogger<WatchDataSenderObserver> logger;
+        private int progressPercent = 8;
         private readonly IDevice currentDevice;
         private readonly ILoggerFactory loggerFactory;
         private readonly IWatchControllerUtilities watchControllerUtilities;
@@ -64,7 +67,11 @@ namespace RangemanSync.Services.WatchDataSender
                     logger.LogDebug($"--- SendInitCommandsAndWaitForCCCData - NotifyCharacteristicValue. data equals to convoy data : {Utils.GetPrintableBytesArray(new byte[] { 00, 00, 00 })}");
                     workflowStep = WorkflowStep.SendConvoyConnectionParameters;
 
+                    FireProgressEvent(ref progressPercent, 8, "Sent init commands and waited for CCC data");
+
                     await SendConvoyConnectionParameters();
+
+                    FireProgressEvent(ref progressPercent, 8, "Sent convoy connection parameters");
 
                     workflowStep = WorkflowStep.SendDataCategoryAndWaitForConnectionParams;
 
@@ -76,6 +83,8 @@ namespace RangemanSync.Services.WatchDataSender
 
             if (value.Item1.ToString() == BLEConstants.CasioConvoyCharacteristic && workflowStep == WorkflowStep.SendDataCategoryAndWaitForConnectionParams)
             {
+                FireProgressEvent(ref progressPercent, 8, "Sent category and waited for connection params");
+
                 logger.LogDebug($"--- SendCategoryAndWaitForConnectionParams - NotifyCharacteristicValue. Received data bytes : {Utils.GetPrintableBytesArray(value.Item2)}");
                 var kindData = value.Item2[0];
 
@@ -91,10 +100,14 @@ namespace RangemanSync.Services.WatchDataSender
 
             if (value.Item1.ToString() == BLEConstants.CasioDataRequestSPCharacteristic && workflowStep == WorkflowStep.SendDataConnectionSettingsBasedOnParams)
             {
+                FireProgressEvent(ref progressPercent, 8, "Sent connection settings based on params");
+
                 logger.LogDebug("-- DataBufferedConvoySender step: About to start BufferedConvoySender");
                 workflowStep = WorkflowStep.DataBufferedConvoySender;
                 BufferedConvoySender bufferedConvoySender = new BufferedConvoySender(currentDevice, watchControllerUtilities, data, loggerFactory);
                 await bufferedConvoySender.Send();
+
+                FireProgressEvent(ref progressPercent, 8, $"Finished using buffered convoy sender. Category = 0x16");
 
                 logger.LogDebug("Finished using BufferedConvoySender in DataBufferedConvoySender");
                 return;
@@ -107,6 +120,8 @@ namespace RangemanSync.Services.WatchDataSender
                     logger.LogDebug("--- CloseCurrentCategoryAndWaitForResponse - Sequence is equals");
                     await CloseCurrentCategoryAndWaitForResponse(0x16);
 
+                    FireProgressEvent(ref progressPercent, 8, "Closed current category and waited for response");
+
                     workflowStep = WorkflowStep.SendHeaderCategoryAndWaitForConnectionParams;
                     await SendCategoryAndWaitForConnectionParams(0x15);
                 }
@@ -116,6 +131,8 @@ namespace RangemanSync.Services.WatchDataSender
 
             if (value.Item1.ToString() == BLEConstants.CasioConvoyCharacteristic && workflowStep == WorkflowStep.SendHeaderCategoryAndWaitForConnectionParams)
             {
+                FireProgressEvent(ref progressPercent, 8, "Sent category and waited for connection params");
+
                 logger.LogDebug($"--- SendCategoryAndWaitForConnectionParams - NotifyCharacteristicValue. Received data bytes : {Utils.GetPrintableBytesArray(value.Item2)}");
                 var kindData = value.Item2[0];
 
@@ -123,7 +140,7 @@ namespace RangemanSync.Services.WatchDataSender
                 {
                     var connectionParameters = new ConnectionParameters(value.Item2);
                     workflowStep = WorkflowStep.SendHeaderConnectionSettingsBasedOnParams;
-                    await SendConnectionSettingsBasedOnParams(connectionParameters, data.Length, 0x15);
+                    await SendConnectionSettingsBasedOnParams(connectionParameters, header.Length, 0x15);
                 }
 
                 return;
@@ -131,9 +148,13 @@ namespace RangemanSync.Services.WatchDataSender
 
             if (value.Item1.ToString() == BLEConstants.CasioDataRequestSPCharacteristic && workflowStep == WorkflowStep.SendHeaderConnectionSettingsBasedOnParams)
             {
+                FireProgressEvent(ref progressPercent, 8, "Sent connection settings based on params");
+
                 workflowStep = WorkflowStep.HeaderBufferedConvoySender;
-                BufferedConvoySender bufferedConvoySender = new BufferedConvoySender(currentDevice, watchControllerUtilities, data, loggerFactory);
+                BufferedConvoySender bufferedConvoySender = new BufferedConvoySender(currentDevice, watchControllerUtilities, header, loggerFactory);
                 await bufferedConvoySender.Send();
+
+                FireProgressEvent(ref progressPercent, 8, $"Finished using buffered convoy sender. Category = 0x15");
 
                 return;
             }
@@ -154,7 +175,11 @@ namespace RangemanSync.Services.WatchDataSender
 
             if (value.Item1.ToString() == BLEConstants.CasioConvoyCharacteristic && workflowStep == WorkflowStep.WriteFinalClosingData)
             {
+                FireProgressEvent(ref progressPercent, 8, "Finished writing final closing data");
                 await WriteFinalClosingData2();
+
+                progressPercent = 100;
+                FireProgressEvent(ref progressPercent, 0, "Finished sending data");
             }
         }
 
@@ -223,6 +248,17 @@ namespace RangemanSync.Services.WatchDataSender
                 Guid.Parse(BLEConstants.CasioConvoyCharacteristic), new byte[] { 0x04, 0x01, 0x48, 0x00, 0x50, 0x00, 0x04, 0x00, 0x58, 0x02 });
 
             logger.LogDebug("--- WriteFinalClosingData2 - End");
+        }
+
+        private void FireProgressEvent(ref int percentage, int increment, string text)
+        {
+            if (ProgressChanged != null)
+            {
+                var eventArgs = new DataSenderProgressEventArgs { PercentageText = $"{percentage}%", Text = text, PercentageNumber = percentage };
+                ProgressChanged(this, eventArgs);
+
+                percentage += increment;
+            }
         }
 
         private static byte[] CreateConvoyData(long j, long j2, int i, int i2, int i3)

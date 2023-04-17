@@ -35,20 +35,13 @@ namespace RangemanSync.Services.WatchDataSender
 
             var remoteWatchController = new RemoteWatchController(currentDevice,watchControllerUtilities, loggerFactory);
             var watchDataSenderObserver = new WatchDataSenderObserver(currentDevice, loggerFactory, watchControllerUtilities, data, header);
+            watchDataSenderObserver.ProgressChanged += ProgressChanged;
+
             await remoteWatchController.SubscribeToCharacteristicChanges(watchDataSenderObserver);
 
             await remoteWatchController.SendInitCommandsAndWaitForCCCData(new byte[] { 00, 00, 00 });
         }
 
-        private void FireProgressEvent(ref int percentage, int increment, string text)
-        {
-            if (ProgressChanged != null)
-            {
-                var eventArgs = new DataSenderProgressEventArgs { PercentageText = $"{percentage}%", Text = text, PercentageNumber = percentage };
-                ProgressChanged(this, eventArgs);
-
-                percentage += increment;
-            }
-        }
+       
     }
 }
