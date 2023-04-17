@@ -3,7 +3,7 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
              xmlns:mapsui="clr-namespace:Mapsui.UI.Maui;assembly=Mapsui.UI.Maui"
              x:Class="RangemanSync.MapPage"
-             Title="MapPage">
+             Title="Map">
     <Grid RowDefinitions="{Binding GridViewRows}">
         <AbsoluteLayout>
             <ContentView AbsoluteLayout.LayoutBounds="0,0,1,1"
@@ -42,7 +42,7 @@
                       AbsoluteLayout.LayoutFlags="PositionProportional"
                       HeightRequest="65"
                       WidthRequest="65"
-                      CornerRadius="25" Text="Del node" x:Name="DeleteNodeButton" 
+                      CornerRadius="25" Text="Del" x:Name="DeleteNodeButton" 
                       Command="{Binding Path=DeleteCommand}"/>
 
             <Button AbsoluteLayout.LayoutBounds="1 , 1 , AutoSize, AutoSize"
