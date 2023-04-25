@@ -6,12 +6,12 @@
   xmlns:rescap="http://schemas.microsoft.com/appx/manifest/foundation/windows10/restrictedcapabilities"
   IgnorableNamespaces="uap rescap">
 
-  <Identity Name="30006ZsoltPSoftwareSoluti.CasioGPR-B1000GPXport" Publisher="CN=E4FF4F3A-5832-43A6-AAEC-55EB2974FA98" Version="1.1.7.0" />
+  <Identity Name="30006ZsoltPSoftwareSoluti.CasioGPR-B1000Sync" Publisher="CN=E4FF4F3A-5832-43A6-AAEC-55EB2974FA98" Version="1.0.0.0" />
 
   <mp:PhoneIdentity PhoneProductId="21afb082-2882-45e2-8393-4534565a7ee8" PhonePublisherId="00000000-0000-0000-0000-000000000000"/>
 
   <Properties>
-    <DisplayName>Casio GPR-B1000 GPXport</DisplayName>
+    <DisplayName>Casio GPR-B1000 Sync</DisplayName>
     <PublisherDisplayName>Zsolt P Software Solutions</PublisherDisplayName>
     <Logo>$placeholder$.png</Logo>
   </Properties>
@@ -28,7 +28,7 @@
   <Applications>
     <Application Id="App" Executable="$targetnametoken$.exe" EntryPoint="$targetentrypoint$">
       <uap:VisualElements
-        DisplayName="Casio GPR-B1000 GPXport"
+        DisplayName="Casio GPR-B1000 Sync"
         Description="$placeholder$"
         Square150x150Logo="$placeholder$.png"
         Square44x44Logo="$placeholder$.png"
