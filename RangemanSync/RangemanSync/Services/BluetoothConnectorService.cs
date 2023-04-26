@@ -71,9 +71,12 @@ namespace RangemanSync.Services
             scanCancellationTokenSource = new CancellationTokenSource();
             try
             {
-                await adapter.StartScanningForDevicesAsync(scanFilterOptions: null,
-                    (device) => device.Name != null && device.Name.Contains(WatchDeviceName),
-                    allowDuplicatesKey: false, scanCancellationTokenSource.Token);
+                if (currentDevice == null || (currentDevice != null && currentDevice.State == Plugin.BLE.Abstractions.DeviceState.Disconnected))
+                {
+                    await adapter.StartScanningForDevicesAsync(scanFilterOptions: null,
+                        (device) => device.Name != null && device.Name.Contains(WatchDeviceName),
+                        allowDuplicatesKey: false, scanCancellationTokenSource.Token);
+                }
             }
             catch(Exception ex)
             {

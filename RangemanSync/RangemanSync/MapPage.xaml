@@ -36,6 +36,7 @@
                       HeightRequest="65"
                       WidthRequest="65"
                       CornerRadius="25" Text="Send" x:Name="SendButton" 
+                      IsVisible="{Binding WatchCommandButtonsAreVisible}"
                       Command="{Binding Path=SendCommand}"/>
 
             <Button AbsoluteLayout.LayoutBounds="0.5 , 1 , AutoSize, AutoSize"
@@ -43,6 +44,7 @@
                       HeightRequest="65"
                       WidthRequest="65"
                       CornerRadius="25" Text="Del" x:Name="DeleteNodeButton" 
+                      IsVisible="{Binding WatchCommandButtonsAreVisible}"
                       Command="{Binding Path=DeleteCommand}"/>
 
             <Button AbsoluteLayout.LayoutBounds="1 , 1 , AutoSize, AutoSize"
@@ -50,6 +52,7 @@
                       HeightRequest="65"
                       WidthRequest="65"
                       CornerRadius="25" x:Name="SelectNodeButton" Text="{Binding NodesViewModel.CurrentSelectedNode}" 
+                      IsVisible="{Binding WatchCommandButtonsAreVisible}"
                       Command="{Binding Path=SelectCommand}"/>
 
             <Button AbsoluteLayout.LayoutBounds="1 , 1 , AutoSize, AutoSize"
@@ -57,6 +60,7 @@
                       HeightRequest="65"
                       WidthRequest="65"
                       CornerRadius="25" x:Name="DisconnectButton" Text="End"  
+                      IsVisible="{Binding DisconnectButtonIsVisible}"
                       Command="{Binding Path=DisconnectCommand}"/>
 
         </AbsoluteLayout>

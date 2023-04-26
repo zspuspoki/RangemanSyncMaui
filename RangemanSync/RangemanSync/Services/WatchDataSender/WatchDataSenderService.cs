@@ -28,18 +28,23 @@ namespace RangemanSync.Services.WatchDataSender
 
         public async Task SendRoute()
         {
-            var progressPercent = 8;
+            try
+            {
+                logger.LogInformation("--- Starting SendRoute()");
+                logger.LogDebug("Test");
 
-            logger.LogInformation("--- Starting SendRoute()");
-            logger.LogDebug("Test");
+                var remoteWatchController = new RemoteWatchController(currentDevice, watchControllerUtilities, loggerFactory);
+                var watchDataSenderObserver = new WatchDataSenderObserver(currentDevice, loggerFactory, watchControllerUtilities, data, header);
+                watchDataSenderObserver.ProgressChanged += ProgressChanged;
 
-            var remoteWatchController = new RemoteWatchController(currentDevice,watchControllerUtilities, loggerFactory);
-            var watchDataSenderObserver = new WatchDataSenderObserver(currentDevice, loggerFactory, watchControllerUtilities, data, header);
-            watchDataSenderObserver.ProgressChanged += ProgressChanged;
+                await remoteWatchController.SubscribeToCharacteristicChanges(watchDataSenderObserver);
 
-            await remoteWatchController.SubscribeToCharacteristicChanges(watchDataSenderObserver);
-
-            await remoteWatchController.SendInitCommandsAndWaitForCCCData(new byte[] { 00, 00, 00 });
+                await remoteWatchController.SendInitCommandsAndWaitForCCCData(new byte[] { 00, 00, 00 });
+            }
+            catch(Exception ex)
+            {
+                logger.LogError(ex, "SendRoute exception");
+            }
         }
 
        

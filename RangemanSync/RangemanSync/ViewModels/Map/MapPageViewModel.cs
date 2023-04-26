@@ -202,8 +202,6 @@ namespace RangemanSync.ViewModels.Map
                     await watchDataSenderService.SendRoute();
 
                     logger.LogDebug("Map tab - after awaiting SendRoute()");
-                    DisconnectButtonIsVisible = false;
-                    ProgressBarIsVisible = false;
 
                     return true;
                 },
@@ -212,7 +210,11 @@ namespace RangemanSync.ViewModels.Map
                     ProgressMessage = "An error occured during sending watch commands. Please try to connect again";
                     return true;
                 },
-                () => DisconnectButtonIsVisible = true);
+                () => 
+                { 
+                    DisconnectButtonIsVisible = true;
+                    WatchCommandButtonsAreVisible = false;
+                });
 
             sendButtonCanbePressed = true;
         }
@@ -247,8 +249,10 @@ namespace RangemanSync.ViewModels.Map
             disconnectButtonCanbePressed = false;
             await bluetoothConnectorService.DisconnectFromWatch((m) => ProgressMessage = m);
             DisconnectButtonIsVisible = false;
+            WatchCommandButtonsAreVisible = true;
             disconnectButtonCanbePressed = true;
             ProgressBarIsVisible = false;
+            ProgressMessage = "";
         }
         #endregion
 
@@ -259,6 +263,13 @@ namespace RangemanSync.ViewModels.Map
             ProgressMessage = e.Text;
             ProgressBarPercentageMessage = e.PercentageText;
             ProgressBarPercentageNumber = e.PercentageNumber;
+
+            if(e.PercentageNumber == 100)
+            {
+                DisconnectButtonIsVisible = false;
+                WatchCommandButtonsAreVisible = true;
+                ProgressBarIsVisible = false;
+            }
 
             logger.LogDebug($"Current progress bar percentage number: {ProgressBarPercentageNumber}");
         }
